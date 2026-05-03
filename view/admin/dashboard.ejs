@@ -1,0 +1,59 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <div class="flex-between mb-3">
+    <div><h1>⚙️ Admin Dashboard</h1><p class="page-subtitle">Platform overview</p></div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/admin/analytics" class="btn btn-primary btn-sm">📊 Analytics</a>
+      <a href="/admin/users" class="btn btn-ghost btn-sm">👥 Users</a>
+      <a href="/admin/projects" class="btn btn-ghost btn-sm">📋 Projects</a>
+      <a href="/admin/disputes" class="btn btn-ghost btn-sm">⚖️ Disputes</a>
+    </div>
+  </div>
+  <%- include('../layout/flash') %>
+  <div class="grid-4 mb-3">
+    <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value"><%= totalUsers %></div><div class="stat-label">Total Users</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">💻</div><div><div class="stat-value"><%= totalFreelancers %></div><div class="stat-label">Freelancers</div></div></div>
+    <div class="stat-card"><div class="stat-icon yellow">🏢</div><div><div class="stat-value"><%= totalClients %></div><div class="stat-label">Clients</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">📋</div><div><div class="stat-value"><%= totalProjects %></div><div class="stat-label">Total Projects</div></div></div>
+  </div>
+  <div class="grid-3 mb-3">
+    <div class="stat-card"><div class="stat-icon green">🟢</div><div><div class="stat-value"><%= openProjects %></div><div class="stat-label">Open Projects</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">✅</div><div><div class="stat-value"><%= completedProjects %></div><div class="stat-label">Completed</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📈</div><div><div class="stat-value">₹<%= totalEarnings.toLocaleString() %></div><div class="stat-label">Total Earnings</div></div></div>
+  </div>
+  <div class="grid-2 gap-2">
+    <div>
+      <div class="flex-between mb-2"><h3>Recent Users</h3><a href="/admin/users" class="btn btn-ghost btn-sm">Manage All →</a></div>
+      <div class="card" style="padding:0;"><div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+        <tbody>
+          <% recentUsers.forEach(u => { %>
+            <tr>
+              <td><strong><%= u.name %></strong><br><span class="text-muted" style="font-size:.75rem;"><%= u.email %></span></td>
+              <td><span class="badge badge-primary"><%= u.role %></span></td>
+              <td><span style="color:<%= u.isBanned?'var(--danger)':'var(--success)' %>"><%= u.isBanned?'Banned':'Active' %></span></td>
+              <td class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table></div></div>
+    </div>
+    <div>
+      <div class="flex-between mb-2"><h3>Recent Projects</h3><a href="/admin/projects" class="btn btn-ghost btn-sm">Manage All →</a></div>
+      <div class="card" style="padding:0;"><div class="table-wrap"><table>
+        <thead><tr><th>Title</th><th>Status</th><th>Bids</th></tr></thead>
+        <tbody>
+          <% recentProjects.forEach(p => { %>
+            <tr>
+              <td><a href="/projects/<%= p._id %>"><%= p.title.substring(0,38) %><%= p.title.length>38?'...':'' %></a></td>
+              <td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td>
+              <td><strong><%= p.totalBids %></strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table></div></div>
+    </div>
+  </div>
+</div>
+<%- include('../layout/footer') %>

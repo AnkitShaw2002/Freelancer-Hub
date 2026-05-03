@@ -1,0 +1,44 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <div class="flex-between mb-3">
+    <div><h1>📋 Manage Projects</h1><p class="page-subtitle"><%= total %> projects total</p></div>
+    <a href="/admin" class="btn btn-ghost btn-sm">← Admin Home</a>
+  </div>
+  <%- include('../layout/flash') %>
+  <form method="GET" action="/admin/projects" class="filter-bar">
+    <div class="filter-grid">
+      <div class="filter-group"><label class="filter-label">Status</label><select name="status" class="form-control"><option value="">All</option><% ['open','assigned','in-progress','completed','cancelled','disputed'].forEach(s=>{%><option value="<%= s %>" <%= query.status===s?'selected':'' %>><%= s %></option><%})%></select></div>
+      <div class="filter-group" style="flex-direction:row;align-items:flex-end;gap:.5rem;"><button type="submit" class="btn btn-primary">Filter</button><a href="/admin/projects" class="btn btn-ghost">Reset</a></div>
+    </div>
+  </form>
+  <div class="card" style="padding:0;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Budget</th><th>Bids</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% projects.forEach(p => { %>
+            <tr>
+              <td><a href="/projects/<%= p._id %>" style="font-weight:600;color:var(--dark);"><%= p.title.substring(0,40) %><%= p.title.length>40?'...':'' %></a><br><span class="text-muted" style="font-size:.75rem;"><%= p.category %></span></td>
+              <td><%= p.clientName %></td>
+              <td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td>
+              <td>₹<%= p.budget.min.toLocaleString() %>–₹<%= p.budget.max.toLocaleString() %></td>
+              <td><strong><%= p.totalBids %></strong></td>
+              <td class="text-muted"><%= new Date(p.createdAt).toLocaleDateString() %></td>
+              <td style="display:flex;gap:.4rem;">
+                <a href="/projects/<%= p._id %>" class="btn btn-ghost btn-sm">View</a>
+                <form method="POST" action="/admin/projects/<%= p._id %>/delete" style="display:inline;">
+                  <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete project permanently?')">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% if (totalPages > 1) { %>
+    <div class="pagination"><% for(let i=1;i<=totalPages;i++){%><a href="?<%= new URLSearchParams({...query,page:i}).toString() %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a><%}%></div>
+  <% } %>
+</div>
+<%- include('../layout/footer') %>

@@ -1,0 +1,491 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page">
+  <% const currentUserId = currentUser ? (currentUser._id || currentUser.id) : null; %>
+  <% const isClientOwner = currentUserId && project.clientId ? currentUserId.toString() === project.clientId.toString() : false; %>
+  <% const isProjectFreelancer = currentUserId && project.freelancerId ? currentUserId.toString() === project.freelancerId.toString() : false; %>
+  <%- include('layout/flash') %>
+  <div class="sidebar-layout">
+
+    <!-- ── TITLE ROW (full width) ─────────────────────────────────────── -->
+    <div class="col-full">
+      <div class="flex-between mb-3">
+        <div>
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem;">
+            <span class="badge badge-<%= project.status %>"><%= project.status.replace('-',' ') %></span>
+            <span class="badge badge-<%= project.experience %>"><%= project.experience %></span>
+            <span class="badge badge-primary"><%= project.category %></span>
+            <% if (project.isPaid) { %><span style="background:#dcfce7;color:#166534;padding:.2rem .6rem;border-radius:99px;font-size:.75rem;font-weight:700;">🔒 Escrow Active</span><% } %>
+          </div>
+          <h1 style="font-size:1.8rem;"><%= project.title %></h1>
+          <p class="text-muted" style="margin-top:.3rem;">
+            Posted by <strong><%= project.clientName %></strong> · <%= new Date(project.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %> · 👁 <%= project.views %> views
+          </p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--font-heading);font-size:1.8rem;font-weight:800;color:var(--dark);">₹<%= project.budget.min.toLocaleString('en-IN') %> – ₹<%= project.budget.max.toLocaleString('en-IN') %></div>
+          <div class="text-muted" style="font-size:.85rem;"><%= project.budget.type %> project</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LEFT COLUMN ────────────────────────────────────────────────── -->
+    <div class="project-main-content">
+
+      <!-- AI Summary -->
+      <% if (project.aiSummary) { %>
+        <div class="card mb-2" style="background:linear-gradient(135deg,#ede9fe,#f0f9ff);border:1px solid #c4b5fd;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+            <span style="font-size:1.2rem;">🤖</span>
+            <h4 style="color:#5b21b6;margin:0;">AI Summary</h4>
+            <span style="font-size:.72rem;background:#ede9fe;color:#6d28d9;padding:.15rem .5rem;border-radius:99px;font-weight:700;">Gemini AI</span>
+          </div>
+          <p style="color:#4c1d95;margin-bottom:.75rem;font-size:.92rem;"><%= project.aiSummary %></p>
+          <% if (project.aiSkillsMatched && project.aiSkillsMatched.length > 0) { %>
+            <ul style="margin:0;padding-left:1.2rem;color:#5b21b6;font-size:.88rem;">
+              <% project.aiSkillsMatched.forEach(b => { %><li style="margin-bottom:.2rem;"><%= b %></li><% }) %>
+            </ul>
+          <% } %>
+          <% if (project.aiDifficulty || project.aiEstimatedDays) { %>
+            <div style="display:flex;gap:.75rem;margin-top:.75rem;font-size:.8rem;color:#6d28d9;">
+              <% if (project.aiDifficulty) { %><span>📊 Difficulty: <strong><%= project.aiDifficulty %></strong></span><% } %>
+              <% if (project.aiEstimatedDays) { %><span>⏱ Est: <strong><%= project.aiEstimatedDays %> days</strong></span><% } %>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+
+      <!-- Description -->
+      <div class="card mb-2">
+        <h3 style="margin-bottom:1rem;">📄 Project Description</h3>
+        <p style="color:var(--dark3);line-height:1.8;white-space:pre-wrap;"><%= project.description %></p>
+      </div>
+
+      <!-- Skills -->
+      <% if (project.skills && project.skills.length > 0) { %>
+        <div class="card mb-2">
+          <h3 style="margin-bottom:.75rem;">🛠 Required Skills</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+            <% project.skills.forEach(s => { %><span class="skill-tag" style="font-size:.88rem;padding:.35rem .85rem;"><%= s %></span><% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Milestones with Progress UI -->
+      <% if (project.milestones && project.milestones.length > 0) { %>
+        <%
+          const totalMs = project.milestones.length;
+          const approvedMs = project.milestones.filter(m => m.status === 'approved').length;
+          const totalMsAmt = project.milestones.reduce((s,m)=>s+m.amount,0);
+          const approvedAmt = project.milestones.filter(m=>m.status==='approved').reduce((s,m)=>s+m.amount,0);
+          const pct = totalMs > 0 ? Math.round((approvedMs/totalMs)*100) : 0;
+        %>
+        <div class="card mb-2">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+            <h3 style="margin:0;">🏁 Milestones</h3>
+            <div style="font-size:.85rem;color:var(--dark4);"><%= approvedMs %>/<%= totalMs %> complete · ₹<%= approvedAmt.toLocaleString('en-IN') %>/₹<%= totalMsAmt.toLocaleString('en-IN') %> released</div>
+          </div>
+          <!-- Progress bar -->
+          <div style="background:#e5e7eb;border-radius:99px;height:8px;margin-bottom:1.25rem;">
+            <div style="background:linear-gradient(90deg,#6366f1,#8b5cf6); border-radius:99px; height:8px; width: <%= pct %>%; transition:width .4s;"></div>
+          </div>
+          <% project.milestones.forEach((m,i) => { %>
+            <div style="border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; background: <%= m.status === 'approved' ? '#f0fdf4' : (m.status === 'submitted' ? '#eff6ff' : 'var(--lighter)') %>;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">
+                <div>
+                  <div style="font-weight:700;"><%= i+1 %>. <%= m.title %></div>
+                  <% if (m.dueDate) { %><div style="font-size:.78rem;color:var(--dark4);">Due <%= new Date(m.dueDate).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) %></div><% } %>
+                </div>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                  <strong style="font-size:1rem;">₹<%= m.amount.toLocaleString('en-IN') %></strong>
+                  <span class="badge badge-<%= m.status %>" style="text-transform:capitalize;"><%= m.status.replace('-',' ') %></span>
+                </div>
+              </div>
+
+              <% if (m.submittedWork) { %>
+                <div style="background:#dbeafe;border-radius:7px;padding:.65rem .85rem;font-size:.85rem;color:#1e40af;margin-bottom:.5rem;">
+                  <strong>📤 Submitted work:</strong> <%= m.submittedWork %>
+                </div>
+              <% } %>
+
+              <!-- Freelancer: Submit work button -->
+              <% if (currentUser && isProjectFreelancer && ['pending','in-progress'].includes(m.status)) { %>
+                <div id="submit-form-<%= m._id %>" style="display:none;margin-top:.5rem;">
+                  <form method="POST" action="/projects/<%= project._id %>/milestones/<%= m._id %>/submit">
+                    <textarea name="submittedWork" class="form-control" rows="2" placeholder="Describe the completed work, include links if applicable..." required style="font-size:.85rem;margin-bottom:.4rem;"></textarea>
+                    <div style="display:flex;gap:.4rem;">
+                      <button type="submit" class="btn btn-success btn-sm">📤 Submit</button>
+                      <button type="button" onclick="document.getElementById('submit-form-<%= m._id %>').style.display='none'" class="btn btn-ghost btn-sm">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+                <button onclick="document.getElementById('submit-form-<%= m._id %>').style.display='block';this.style.display='none'" class="btn btn-accent btn-sm" style="margin-top:.3rem;">
+                  📤 Submit Work for This Milestone
+                </button>
+              <% } %>
+
+              <!-- Client: Approve / Reject buttons -->
+              <% if (currentUser && isClientOwner && m.status === 'submitted') { %>
+                <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
+                  <form method="POST" action="/client/projects/<%= project._id %>/milestones/<%= m._id %>/approve">
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve and release ₹<%= m.amount.toLocaleString() %> to freelancer?')">✅ Approve & Release ₹<%= m.amount.toLocaleString('en-IN') %></button>
+                  </form>
+                  <form method="POST" action="/client/projects/<%= project._id %>/milestones/<%= m._id %>/reject">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Send back for revision?')">🔄 Request Revision</button>
+                  </form>
+                </div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <!-- Final Work Submission Section -->
+      <% if (project.status === 'in-progress' || project.finalWorkSubmitted || project.status === 'completed') { %>
+        <div class="card" style="border: 2px solid #e0e7ff; background: #f5f7ff; margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0; display:flex; align-items:center; gap:.5rem;">
+              🎁 Final Deliverables
+            </h3>
+            <% if (project.finalWorkSubmitted) { %>
+              <span class="badge badge-success">Submitted</span>
+            <% } else if (project.status === 'in-progress') { %>
+              <span class="badge badge-in-progress">Pending</span>
+            <% } %>
+          </div>
+          
+          <% if (project.finalWorkSubmitted) { %>
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1rem;">
+              <div style="font-size:.8rem; color:#64748b; margin-bottom:.5rem;">
+                Submitted by <%= project.freelancerName %> <%= project.finalWorkSubmittedAt ? 'on ' + new Date(project.finalWorkSubmittedAt).toLocaleDateString('en-IN') : '' %>
+              </div>
+              <div style="white-space: pre-wrap; line-height:1.6; color:#1e293b; font-size:.95rem;"><%= project.finalWorkDescription %></div>
+            </div>
+          <% } %>
+
+          <% if (currentUser && isProjectFreelancer && project.status === 'in-progress') { %>
+            <div id="final-submit-form" style="display: <%= project.finalWorkSubmitted ? 'none' : 'block' %>;">
+              <form method="POST" action="/projects/<%= project._id %>/submit-final">
+                <div class="form-group">
+                  <label class="form-label" style="font-size:.85rem;">Work Description / Links</label>
+                  <textarea name="description" class="form-control" rows="4" placeholder="Provide details about the final work, links to files, or any handoff information..." required><%= project.finalWorkDescription %></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">📤 Submit Final Work</button>
+              </form>
+            </div>
+            <% if (project.finalWorkSubmitted) { %>
+              <button onclick="document.getElementById('final-submit-form').style.display='block'; this.style.display='none'" class="btn btn-ghost btn-sm" style="width:100%; margin-top:.5rem;">🔄 Update Submission</button>
+            <% } %>
+          <% } %>
+
+          <% if (currentUser && isClientOwner && project.status === 'in-progress' && !project.finalWorkSubmitted) { %>
+            <div class="alert alert-info" style="margin:0; font-size:.85rem; border:none; background:#dbeafe; color:#1e40af;">
+              ℹ️ Waiting for the freelancer to submit the final work deliverables.
+            </div>
+          <% } %>
+          
+          <% if (currentUser && isClientOwner && project.status === 'in-progress' && project.finalWorkSubmitted) { %>
+            <div class="alert alert-success" style="margin:0; font-size:.85rem; border:none; background:#dcfce7; color:#166534;">
+              ✨ Work submitted! Please review the deliverables above. If satisfied, click <strong>Mark Complete</strong> in the sidebar to release payment.
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+
+      <!-- Bids / Proposals Section -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem;">
+          <h3>🎯 Proposals (<%= project.totalBids %>)</h3>
+          <!-- AI Bid Analysis button (client only, open projects with bids) -->
+          <% if (currentUser && isClientOwner && project.bids && project.bids.filter(b=>b.status==='pending').length > 0) { %>
+            <button id="ai-analyse-btn" class="btn btn-ghost btn-sm" onclick="runAIAnalysis()">🤖 AI Recommend</button>
+          <% } %>
+        </div>
+
+        <!-- AI analysis result panel -->
+        <div id="ai-result" style="display:none;background:#ede9fe;border-radius:10px;padding:1rem;margin-bottom:1rem;">
+          <div style="font-weight:700;color:#5b21b6;margin-bottom:.4rem;">🤖 AI Recommendation</div>
+          <div id="ai-result-text" style="font-size:.9rem;color:#4c1d95;"></div>
+        </div>
+
+        <!-- Freelancer bid form -->
+        <% if (currentUser && currentUser.role === 'freelancer' && project.status === 'open') { %>
+          <% if (!myBid) { %>
+            <div style="background:var(--primary-light);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
+              <h4 style="margin-bottom:1rem;color:var(--primary);">Submit Your Proposal</h4>
+              <form method="POST" action="/projects/<%= project._id %>/bid">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Your Bid (₹)</label>
+                    <input type="number" name="amount" class="form-control" placeholder="5000" min="1" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Delivery (days)</label>
+                    <input type="number" name="deliveryDays" class="form-control" placeholder="14" min="1" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Cover Letter</label>
+                  <textarea name="proposal" class="form-control" rows="4" placeholder="Explain why you're the best fit, your approach, and relevant experience..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Proposal →</button>
+              </form>
+            </div>
+          <% } else { %>
+            <div class="alert alert-info">✅ You've already submitted a bid. <span class="badge badge-<%= myBid.status %>"><%= myBid.status %></span>
+              <% if (myBid.status === 'pending') { %>
+                <form method="POST" action="/projects/<%= project._id %>/bid/<%= myBid._id %>/withdraw" style="display:inline;margin-left:.5rem;">
+                  <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Withdraw bid?')">Withdraw</button>
+                </form>
+              <% } %>
+            </div>
+          <% } %>
+        <% } %>
+
+        <!-- Bid cards -->
+        <% if (project.bids && project.bids.length > 0) { %>
+          <% project.bids.forEach(bid => { %>
+            <div class="bid-card <%= bid.status %>" data-freelancer="<%= bid.freelancerName %>">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                  <div class="avatar-placeholder" style="width:40px;height:40px;font-size:.9rem;flex-shrink:0;"><%= bid.freelancerName.charAt(0) %></div>
+                  <div>
+                    <a href="/profile/<%= bid.freelancerId %>" style="font-weight:700;color:var(--dark);"><%= bid.freelancerName %></a>
+                    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.2rem;">
+                      <span class="text-muted" style="font-size:.78rem;">⭐ <%= bid.freelancerRating||0 %></span>
+                      <% (bid.freelancerSkills||[]).slice(0,3).forEach(s=>{%><span class="skill-tag"><%= s %></span><%})%>
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-weight:800;font-size:1.1rem;color:var(--dark);">₹<%= bid.amount.toLocaleString('en-IN') %></div>
+                  <div class="text-muted" style="font-size:.78rem;">⏱ <%= bid.deliveryDays %> days</div>
+                  <span class="badge badge-<%= bid.status %>" style="margin-top:.2rem;"><%= bid.status %></span>
+                </div>
+              </div>
+              <p style="font-size:.88rem;color:var(--dark3);line-height:1.6;"><%= bid.proposal %></p>
+              <% if (currentUser && isClientOwner && bid.status === 'pending' && project.status === 'open') { %>
+                <div style="display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap;">
+                  <form method="POST" action="/client/projects/<%= project._id %>/award/<%= bid._id %>">
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Award project to <%= bid.freelancerName %>?')">✅ Award Project</button>
+                  </form>
+                  <a href="/messages/<%= bid.freelancerId %>" class="btn btn-ghost btn-sm">💬 Message</a>
+                </div>
+              <% } %>
+              <% if (currentUser && bid.status === 'accepted') { %>
+                <a href="/messages/<%= bid.freelancerId %>" class="btn btn-ghost btn-sm" style="margin-top:.5rem;">💬 Message Freelancer</a>
+              <% } %>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="empty-state" style="padding:2rem;"><div class="icon">📭</div><p>No proposals yet. Be the first!</p></div>
+        <% } %>
+      </div>
+
+      <!-- Review Form -->
+      <% if (currentUser && project.status === 'completed') { %>
+        <% const isClientR = currentUser && isClientOwner; %>
+        <% const isFreelancerR = currentUser && isProjectFreelancer; %>
+        <% const canReview = (isClientR && !project.clientReviewed) || (isFreelancerR && !project.freelancerReviewed); %>
+        <% if (canReview) { %>
+          <div class="card mt-2">
+            <h3 style="margin-bottom:1rem;">⭐ Leave a Review</h3>
+            <form method="POST" action="/reviews/<%= project._id %>">
+              <div class="form-group">
+                <label class="form-label">Rating</label>
+                <select name="rating" class="form-control" required>
+                  <option value="5">⭐⭐⭐⭐⭐ Excellent (5/5)</option>
+                  <option value="4">⭐⭐⭐⭐ Good (4/5)</option>
+                  <option value="3">⭐⭐⭐ Average (3/5)</option>
+                  <option value="2">⭐⭐ Below Average (2/5)</option>
+                  <option value="1">⭐ Poor (1/5)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Comment</label>
+                <textarea name="comment" class="form-control" rows="3" required placeholder="Share your experience working on this project..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+
+    <!-- ── RIGHT SIDEBAR ───────────────────────────────────────────────── -->
+    <div>
+      <!-- Status Actions Card -->
+      <div class="card mb-2">
+        <h4 style="margin-bottom:1rem;">Project Status</h4>
+        <span class="badge badge-<%= project.status %>" style="font-size:.9rem;padding:.4rem 1rem;margin-bottom:1rem;display:inline-block;"><%= project.status.replace('-',' ') %></span>
+
+        <% if (currentUser) { %>
+          <% const isMyProject = currentUser && isClientOwner; %>
+          <% const isAssignedFreelancer = currentUser && isProjectFreelancer; %>
+
+          <!-- Pay button -->
+          <% if (isMyProject && project.status === 'assigned' && !project.isPaid) { %>
+            <a href="/client/projects/<%= project._id %>/pay" class="btn btn-primary btn-sm btn-block" style="margin-bottom:.5rem;">💳 Pay & Activate Escrow</a>
+          <% } %>
+
+          <% if (project.isPaid && project.status === 'assigned') { %>
+            <form method="POST" action="/projects/<%= project._id %>/status" style="margin-bottom:.5rem;">
+              <input type="hidden" name="newStatus" value="in-progress">
+              <button type="submit" class="btn btn-accent btn-sm btn-block">▶ Start Project</button>
+            </form>
+          <% } else if (isMyProject && project.status === 'assigned' && !project.isPaid) { %>
+            <%# Pay button shown above %>
+          <% } %>
+
+          <% if (project.status === 'in-progress') { %>
+            <% if (isMyProject) { %>
+              <form method="POST" action="/projects/<%= project._id %>/status" style="margin-top:.5rem;">
+                <input type="hidden" name="newStatus" value="completed">
+                <button type="submit" 
+                        class="btn <%= project.finalWorkSubmitted ? 'btn-success' : 'btn-ghost' %> btn-sm btn-block" 
+                        <%= !project.finalWorkSubmitted ? 'disabled' : '' %>
+                        onclick="return confirm('Mark as complete? This will release payment to the freelancer.')">
+                  ✅ Mark Complete
+                </button>
+                <% if (!project.finalWorkSubmitted) { %>
+                  <p style="font-size:.72rem; color:#ef4444; margin-top:.4rem; text-align:center; line-height:1.2;">
+                    Final work not yet submitted by freelancer
+                  </p>
+                <% } %>
+              </form>
+            <% } else if (isAssignedFreelancer) { %>
+               <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:.75rem; text-align:center; margin-top:.5rem;">
+                 <div style="font-size:.75rem; color:#0369a1; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.2rem;">Project in Progress</div>
+                 <div style="font-size:.85rem; color:#075985;">Focus on deliverables!</div>
+               </div>
+            <% } %>
+          <% } %>
+
+          <% if (isMyProject && project.status === 'open') { %>
+            <a href="/client/projects/<%= project._id %>/edit" class="btn btn-ghost btn-sm btn-block" style="margin-top:.5rem;">✏️ Edit Project</a>
+          <% } %>
+
+          <% if (isMyProject && project.freelancerId && ['assigned','in-progress'].includes(project.status)) { %>
+            <a href="/client/projects/<%= project._id %>/contract" class="btn btn-ghost btn-sm btn-block" style="margin-top:.5rem;">📄 View Contract</a>
+          <% } %>
+
+          <% if ((isMyProject || isAssignedFreelancer) && ['assigned','in-progress'].includes(project.status)) { %>
+            <a href="/projects/<%= project._id %>/dispute"
+               class="btn btn-sm btn-block"
+               style="margin-top:.5rem;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;"
+               onclick="return confirm('Are you sure? Try resolving directly first.')">
+              ⚖️ Raise Dispute
+            </a>
+          <% } %>
+
+          <% if (isMyProject && ['open','assigned'].includes(project.status)) { %>
+            <form method="POST" action="/projects/<%= project._id %>/status" style="margin-top:.5rem;">
+              <input type="hidden" name="newStatus" value="cancelled">
+              <button type="submit" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Cancel project?')">❌ Cancel</button>
+            </form>
+          <% } %>
+        <% } %>
+      </div>
+
+      <!-- Project Info -->
+      <div class="card mb-2">
+        <h4 style="margin-bottom:1rem;">📋 Project Info</h4>
+        <div style="display:flex;flex-direction:column;gap:.75rem;font-size:.88rem;">
+          <div style="display:flex;justify-content:space-between;"><span class="text-muted">Budget Type</span><strong><%= project.budget.type %></strong></div>
+          <div style="display:flex;justify-content:space-between;"><span class="text-muted">Experience</span><span class="badge badge-<%= project.experience %>"><%= project.experience %></span></div>
+          <div style="display:flex;justify-content:space-between;"><span class="text-muted">Proposals</span><strong><%= project.totalBids %></strong></div>
+          <% if (project.deadline) { %>
+            <div style="display:flex;justify-content:space-between;"><span class="text-muted">Deadline</span><strong><%= new Date(project.deadline).toLocaleDateString('en-IN') %></strong></div>
+          <% } %>
+          <% if (project.isPaid) { %>
+            <div style="display:flex;justify-content:space-between;"><span class="text-muted">Payment</span><span style="color:#166534;font-weight:700;">🔒 In Escrow</span></div>
+          <% } %>
+          <% if (project.completedAt) { %>
+            <div style="display:flex;justify-content:space-between;"><span class="text-muted">Completed</span><strong><%= new Date(project.completedAt).toLocaleDateString('en-IN') %></strong></div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Client -->
+      <div class="card mb-2">
+        <h4 style="margin-bottom:1rem;">👤 Client</h4>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <div class="avatar-placeholder" style="width:44px;height:44px;"><%= project.clientName.charAt(0) %></div>
+          <a href="/profile/<%= project.clientId %>" style="font-weight:700;color:var(--dark);"><%= project.clientName %></a>
+        </div>
+        <% if (currentUser && currentUserId && project.clientId && currentUserId.toString() !== project.clientId.toString()) { %>
+          <a href="/messages/<%= project.clientId %>" class="btn btn-ghost btn-sm btn-block mt-2">💬 Message Client</a>
+        <% } %>
+      </div>
+
+      <!-- Assigned Freelancer -->
+      <% if (project.freelancerId && project.freelancerName) { %>
+        <div class="card">
+          <h4 style="margin-bottom:1rem;">💻 Hired Freelancer</h4>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <div class="avatar-placeholder" style="width:44px;height:44px;"><%= project.freelancerName.charAt(0) %></div>
+            <a href="/profile/<%= project.freelancerId %>" style="font-weight:700;color:var(--dark);"><%= project.freelancerName %></a>
+          </div>
+          <% if (currentUser && currentUserId && project.freelancerId && currentUserId.toString() !== project.freelancerId.toString()) { %>
+            <a href="/messages/<%= project.freelancerId %>" class="btn btn-ghost btn-sm btn-block mt-2">💬 Message Freelancer</a>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+async function runAIAnalysis() {
+  const btn = document.getElementById('ai-analyse-btn');
+  const panel = document.getElementById('ai-result');
+  const text = document.getElementById('ai-result-text');
+  btn.disabled = true;
+  btn.textContent = '🤖 Analysing…';
+  try {
+    const res = await fetch('/projects/<%= project._id %>/ai-analyse');
+    const data = await res.json();
+    panel.style.display = 'block';
+    if (data.error) {
+      text.innerHTML = `<span style="color:#dc2626;">${data.error}</span>`;
+    } else {
+      text.innerHTML = `<strong>Recommended:</strong> ${data.recommendedName}<br><span style="opacity:.9;">${data.reason}</span><br><span style="font-size:.8rem;margin-top:.25rem;display:inline-block;">Risk level: <strong>${data.riskLevel}</strong></span>`;
+      // Highlight the recommended bid card
+      document.querySelectorAll('.bid-card').forEach(card => {
+        if (card.dataset.freelancer === data.recommendedName) {
+          card.style.border = '2px solid #6366f1';
+          card.style.background = '#ede9fe';
+        }
+      });
+    }
+  } catch(e) {
+    panel.style.display = 'block';
+    text.textContent = 'AI analysis failed. Check that GEMINI_API_KEY is set.';
+  }
+  btn.disabled = false;
+  btn.textContent = '🤖 AI Recommend';
+}
+// Show paid=1 flash message from Stripe redirect
+if (window.location.search.includes('paid=1')) {
+  const isPaidInDb = <%= Boolean(project.isPaid) %>;
+  
+  if (!isPaidInDb) {
+    // Webhook race condition: Stripe redirected before the webhook finished saving to the DB.
+    // Show a loading screen and refresh in 2 seconds to pull the fresh state.
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;font-family:sans-serif;color:#4f46e5;background:#f8fafc;"><div style="font-size:3rem;margin-bottom:1rem;">⏳</div><h2>Verifying Secure Payment...</h2><p style="color:#64748b;">Locking funds in escrow, please wait a moment...</p></div>';
+    setTimeout(() => {
+      window.location.href = window.location.pathname + '?paid=1';
+    }, 2500);
+  } else {
+    // Webhook has finished, DB is up to date! Show success.
+    const f = document.querySelector('.flash-area') || document.querySelector('.page');
+    const div = document.createElement('div');
+    div.className = 'alert alert-success';
+    div.style.marginBottom='1rem';
+    div.textContent = '✅ Payment confirmed! Funds are now held in escrow.';
+    f && f.insertBefore(div, f.firstChild);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+</script>
+<%- include('layout/footer') %>

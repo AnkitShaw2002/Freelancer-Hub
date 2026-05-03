@@ -1,0 +1,209 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+
+<style>
+    /* Fix for the "line-clamp" compatibility warnings */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-clamp: 2; /* Standard property for future-proofing */
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-clamp: 3; /* Standard property for future-proofing */
+    }
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>
+
+<div class="container py-4">
+    <%- include('layout/flash') %>
+    
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="fw-bold">Browse Projects</h1>
+            <p class="text-muted mb-0">
+                <% const hasFilters = query.search || query.category || query.complexity || query.budget_min || query.budget_max; %>
+                <span class="badge bg-primary-soft text-primary"><%= total %> project<%= total!==1?'s':'' %> found</span>
+                <% if (hasFilters) { %>
+                    — <a href="/projects" class="text-decoration-none small text-danger"><i class="bi bi-x-circle me-1"></i>Clear all filters</a>
+                <% } %>
+            </p>
+        </div>
+        <% if (currentUser && currentUser.role === 'client') { %>
+            <a href="/client/projects/create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Post a Project
+            </a>
+        <% } %>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="/projects" class="row g-3">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label small fw-bold text-muted">🔍 Search</label>
+                    <input type="text" name="search" class="form-control rounded-3" placeholder="Keywords, skills..." value="<%= query.search||'' %>">
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-muted">📁 Category</label>
+                    <select name="category" class="form-select rounded-3">
+                        <option value="">All Categories</option>
+                        <% categories.forEach(c => { %>
+                            <option value="<%= c %>" <%= query.category===c?'selected':'' %>><%= c %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-muted">🎓 Complexity</label>
+                    <select name="complexity" class="form-select rounded-3">
+                        <option value="">Any Level</option>
+                        <option value="low" <%= query.complexity==='low'?'selected':'' %>>Low (Beginner)</option>
+                        <option value="medium" <%= query.complexity==='medium'?'selected':'' %>>Medium (Intermediate)</option>
+                        <option value="high" <%= query.complexity==='high'?'selected':'' %>>High (Expert)</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-6">
+                    <label class="form-label small fw-bold text-muted">💰 Min (₹)</label>
+                    <input type="number" name="budget_min" class="form-control rounded-3" placeholder="Min" value="<%= query.budget_min||'' %>">
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-6">
+                    <label class="form-label small fw-bold text-muted">💰 Max (₹)</label>
+                    <input type="number" name="budget_max" class="form-control rounded-3" placeholder="Max" value="<%= query.budget_max||'' %>">
+                </div>
+
+                <div class="col-12 d-flex justify-content-between align-items-center mt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small fw-bold text-muted text-nowrap">Sort By:</label>
+                        <select name="sort" class="form-select form-select-sm border-0 bg-light rounded-pill px-3">
+                            <option value="newest" <%= query.sort==='newest'?'selected':'' %>>Newest First</option>
+                            <option value="budget_high" <%= query.sort==='budget_high'?'selected':'' %>>Budget: High to Low</option>
+                            <option value="budget_low" <%= query.sort==='budget_low'?'selected':'' %>>Budget: Low to High</option>
+                            <option value="bids" <%= query.sort==='bids'?'selected':'' %>>Most Proposals</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/projects" class="btn btn-light rounded-pill px-4">Reset</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <% if (projects.length === 0) { %>
+        <div class="text-center py-5">
+            <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-search"></i></div>
+            <h2 class="fw-bold">No projects found</h2>
+            <p class="text-muted">Try adjusting your filters or search keywords.</p>
+            <a href="/projects" class="btn btn-outline-primary rounded-pill mt-2 px-4">Clear All Filters</a>
+        </div>
+    <% } else { %>
+        <div class="row g-4">
+            <% projects.forEach(p => { %>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary-soft text-primary rounded-pill px-3 text-capitalize"><%= p.status %></span>
+                                <small class="text-muted fw-bold small text-uppercase"><%= p.budget.type %></small>
+                            </div>
+                            
+                            <h5 class="fw-bold mb-2">
+                                <a href="/projects/<%= p._id %>" class="text-dark text-decoration-none stretched-link">
+                                    <%= p.title %>
+                                </a>
+                            </h5>
+
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                <span class="small text-muted"><i class="bi bi-folder2 me-1"></i> <%= p.category %></span>
+                                <span class="badge bg-info-soft text-info small border border-info-subtle">
+                                    <i class="bi bi-bar-chart me-1"></i><%= p.aiComplexity || 'Standard' %>
+                                </span>
+                            </div>
+
+                            <% if (p.aiSummary) { %>
+                                <div class="bg-light p-2 rounded-3 mb-3 border-start border-primary border-4">
+                                    <p class="small mb-0 text-dark-emphasis line-clamp-2">
+                                        <i class="bi bi-stars text-primary me-1"></i><%= p.aiSummary %>
+                                    </p>
+                                </div>
+                            <% } else { %>
+                                <p class="small text-muted mb-3 flex-grow-1 line-clamp-3">
+                                    <%= p.description %>
+                                </p>
+                            <% } %>
+
+                            <div class="mt-auto">
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    <% (p.skills||[]).slice(0,3).forEach(s => { %>
+                                        <span class="badge bg-white text-dark border rounded-pill px-2" style="font-size: 0.7rem;"><%= s %></span>
+                                    <% }) %>
+                                    <% if((p.skills||[]).length > 3) { %>
+                                        <span class="badge bg-white text-dark border rounded-pill px-2" style="font-size: 0.7rem;">+<%= p.skills.length-3 %></span>
+                                    <% } %>
+                                </div>
+
+                                <hr class="my-3 opacity-10">
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold text-dark mb-0">₹<%= p.budget.min.toLocaleString('en-IN') %>+</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;">by <%= p.clientName %></div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="small fw-bold text-primary">🎯 <%= p.totalBids %> Bids</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;"><%= new Date(p.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?<%= new URLSearchParams({...query, page:currentPage-1}).toString() %>">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                    
+                    <% for(let i=1; i<=totalPages; i++){ %>
+                        <li class="page-item <%= currentPage===i?'active':'' %>">
+                            <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?<%= new URLSearchParams({...query, page:i}).toString() %>"><%= i %></a>
+                        </li>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?<%= new URLSearchParams({...query, page:currentPage+1}).toString() %>">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    <% } %>
+</div>
+
+<%- include('layout/footer') %>

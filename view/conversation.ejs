@@ -1,0 +1,61 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page" style="max-width:800px;">
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+    <a href="/messages" class="btn btn-ghost btn-sm">← Back</a>
+    <div class="avatar-placeholder" style="width:40px;height:40px;font-size:.9rem;"><%= otherUser.name.charAt(0) %></div>
+    <div><strong><%= otherUser.name %></strong><div class="text-muted" style="font-size:.8rem;"><%= otherUser.role %><% if(otherUser.category){ %> · <%= otherUser.category %><% } %></div></div>
+    <a href="/profile/<%= otherUser._id %>" class="btn btn-ghost btn-sm" style="margin-left:auto;">View Profile</a>
+  </div>
+  <div class="chat-area">
+    <div class="chat-messages" id="chatMessages">
+      <% if (messages.length === 0) { %>
+        <div style="text-align:center;color:var(--mid);padding:2rem;">Start the conversation!</div>
+      <% } %>
+      <% messages.forEach(m => { const isSent = m.senderId.toString() === currentUser._id.toString(); %>
+        <div style="display:flex;flex-direction:column;align-items:<%= isSent?'flex-end':'flex-start' %>;">
+          <div class="msg-bubble <%= isSent?'sent':'received' %>">
+            <%= m.content %>
+            <div class="msg-time"><%= new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div id="typingIndicator" style="padding:.25rem 1.5rem;font-size:.78rem;color:var(--mid);display:none;"><%= otherUser.name %> is typing...</div>
+    <div class="chat-input">
+      <form method="POST" action="/messages/send" style="display:flex;gap:.75rem;flex:1;" id="msgForm">
+        <input type="hidden" name="receiverId" value="<%= otherUser._id %>">
+        <input type="text" name="content" id="msgInput" placeholder="Type a message..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  // Auto scroll to bottom
+  const chatMessages = document.getElementById('chatMessages');
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  // Socket real-time
+  const socket = window._socket;
+  if (socket) {
+    socket.emit('join', '<%= currentUser._id %>');
+    document.getElementById('msgInput').addEventListener('input', () => {
+      socket.emit('typing', { receiverId: '<%= otherUser._id %>' });
+    });
+    socket.on('newMessage', (msg) => {
+      if (msg.senderId && msg.senderId.toString() === '<%= otherUser._id %>') {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;';
+        div.innerHTML = `<div class="msg-bubble received">${msg.content}<div class="msg-time">now</div></div>`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    });
+    socket.on('typing', () => {
+      const t = document.getElementById('typingIndicator');
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2000);
+    });
+  }
+</script>
+<%- include('layout/footer') %>

@@ -1,0 +1,43 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <%- include('../layout/flash') %>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+    <div><h1>My Projects</h1><p class="page-subtitle"><%= projects.length %> project(s) posted</p></div>
+    <a href="/client/projects/create" class="btn btn-primary">+ Post New Project</a>
+  </div>
+  <% if (projects.length === 0) { %>
+    <div class="empty-state card"><div class="icon">📭</div><h3>No projects yet</h3><p>Post your first project to start receiving bids</p><a href="/client/projects/create" class="btn btn-primary mt-2">Post a Project</a></div>
+  <% } else { %>
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Project</th><th>Status</th><th>Budget</th><th>Bids</th><th>Deadline</th><th>Actions</th></tr></thead>
+          <tbody>
+            <% projects.forEach(p => { %>
+              <tr>
+                <td>
+                  <a href="/projects/<%= p._id %>" style="font-weight:700;color:var(--dark);"><%= p.title %></a>
+                  <br><span class="text-muted" style="font-size:.78rem;"><%= p.category %> · <%= p.experience %></span>
+                </td>
+                <td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td>
+                <td><strong>₹<%= p.budget.min.toLocaleString() %>–₹<%= p.budget.max.toLocaleString() %></strong></td>
+                <td><span style="font-weight:700;color:<%= p.totalBids>0?'var(--success)':'var(--mid)' %>"><%= p.totalBids %></span></td>
+                <td class="text-muted"><%= p.deadline ? new Date(p.deadline).toLocaleDateString() : '—' %></td>
+                <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+                  <a href="/projects/<%= p._id %>" class="btn btn-ghost btn-sm">View</a>
+                  <% if (['open','cancelled'].includes(p.status)) { %>
+                    <form method="POST" action="/client/projects/<%= p._id %>?_method=DELETE" style="display:inline;">
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this project?')">Delete</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>
+<%- include('../layout/footer') %>

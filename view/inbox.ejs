@@ -1,0 +1,28 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page" style="max-width:800px;">
+  <div class="page-header"><h1>✉️ Messages</h1><p class="page-subtitle"><%= conversations.length %> conversation(s)</p></div>
+  <%- include('layout/flash') %>
+  <% if (conversations.length === 0) { %>
+    <div class="empty-state card"><div class="icon">📭</div><h3>No messages yet</h3><p>Browse projects or freelancers to start a conversation</p></div>
+  <% } else { %>
+    <div class="conversation-list">
+      <% conversations.forEach(c => { %>
+        <a href="/messages/<%= c.otherId %>" class="conv-item <%= c.unread>0?'unread':'' %>">
+          <div class="avatar-placeholder" style="width:44px;height:44px;flex-shrink:0;font-size:.9rem;"><%= c.otherName.charAt(0) %></div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--dark);"><%= c.otherName %></strong>
+              <span class="text-muted" style="font-size:.75rem;"><%= new Date(c.last.createdAt).toLocaleDateString() %></span>
+            </div>
+            <div style="font-size:.85rem;color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:400px;">
+              <%= c.last.senderId.toString() === currentUser._id.toString() ? 'You: ' : '' %><%= c.last.content %>
+            </div>
+          </div>
+          <% if (c.unread > 0) { %><div style="background:var(--primary);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;"><%= c.unread %></div><% } %>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('layout/footer') %>

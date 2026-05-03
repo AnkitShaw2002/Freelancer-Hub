@@ -1,0 +1,89 @@
+<%- include('layout/header') %>
+<%- include('layout/flash') %>
+
+<body class="bg-main">
+    <div class="container d-flex align-items-center justify-content-center" style="min-height: 90vh;">
+        <div class="auth-card p-5 text-center shadow-lg" style="max-width: 500px; border-radius: 24px; background: white;">
+            
+            <div class="mb-4">
+                <div id="status-icon" class="icon-box-lg bg-primary-soft text-primary mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px;">
+                    <i id="main-icon" class="bi bi-shield-check fs-1"></i>
+                </div>
+            </div>
+            
+            <div id="verify-content">
+                <h2 class="fw-bold mb-3" id="title-text">Confirm Verification</h2>
+                <p class="text-muted mb-4" id="body-text">
+                    You're almost there! Click the arrow below to activate your account and gain full access.
+                </p>
+
+                <div id="action-area" class="d-grid gap-2">
+                    <button id="verify-arrow-btn" class="btn btn-primary py-3 rounded-pill fw-bold shadow-sm transition-all">
+                        Verify Now <i class="bi bi-arrow-right-circle ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="success-area" style="display: none;">
+                <h2 class="fw-bold mb-3 text-success">Verified!</h2>
+                <p class="text-muted mb-4">
+                    Your account has been successfully activated. You can now log in to your dashboard.
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="/login" class="btn btn-success py-3 rounded-pill fw-bold">
+                        Go to Login <i class="bi bi-box-arrow-in-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-10">
+
+            <p class="small text-muted mb-0">
+                Need help? <a href="#" class="text-primary fw-bold text-decoration-none">Contact Support</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const verifyBtn = document.getElementById('verify-arrow-btn');
+        const verifyContent = document.getElementById('verify-content');
+        const successArea = document.getElementById('success-area');
+        const statusIcon = document.getElementById('status-icon');
+        const mainIcon = document.getElementById('main-icon');
+
+        verifyBtn.addEventListener('click', async () => {
+            // Disable button and show loading state
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Processing...`;
+
+            // Extract token from URL: /verify-account/YOUR_TOKEN_HERE
+            const token = window.location.pathname.split('/').pop();
+
+            try {
+                const response = await fetch(`/auth/verify-account/${token}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    // Switch to Success UI
+                    verifyContent.style.display = 'none';
+                    successArea.style.display = 'block';
+                    
+                    // Update Icon to Success
+                    statusIcon.classList.replace('bg-primary-soft', 'bg-success-soft');
+                    statusIcon.classList.replace('text-primary', 'text-success');
+                    mainIcon.classList.replace('bi-shield-check', 'bi-check-circle-fill');
+                } else {
+                    alert("Verification failed. The link may be expired or invalid.");
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = `Try Again <i class="bi bi-arrow-right-circle ms-2"></i>`;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again later.");
+                verifyBtn.disabled = false;
+            }
+        });
+    </script>
+</body>

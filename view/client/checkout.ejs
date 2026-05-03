@@ -1,0 +1,146 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page" style="max-width:600px;">
+  <div class="page-header">
+    <h1>💳 Secure Payment</h1>
+    <p class="page-subtitle">Your payment is protected by escrow — funds release only when you approve.</p>
+  </div>
+  <%- include('../layout/flash') %>
+
+  <!-- Order Summary -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div style="font-size:.78rem;font-weight:700;color:var(--dark4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;">Order Summary</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">
+      <div>
+        <div style="font-weight:700;font-size:1.05rem;"><%= project.title %></div>
+        <div style="font-size:.85rem;color:var(--dark4);margin-top:.2rem;">
+          Freelancer: <strong><%= project.freelancerName %></strong> ·
+          Delivery: <strong><%= selectedBid.deliveryDays %> days</strong>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:.75rem;display:flex;flex-direction:column;gap:.4rem;">
+      <div style="display:flex;justify-content:space-between;font-size:.9rem;">
+        <span style="color:var(--dark4);">Project Amount</span>
+        <span>₹<%= selectedBid.amount.toLocaleString('en-IN') %></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.9rem;">
+        <span style="color:var(--dark4);">Platform Fee (10%)</span>
+        <span style="color:#dc2626;">−₹<%= Math.round(selectedBid.amount * 0.1).toLocaleString('en-IN') %></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;border-top:1px solid var(--border);padding-top:.5rem;margin-top:.25rem;">
+        <span>Total Charged to You</span>
+        <span style="color:var(--primary);">₹<%= selectedBid.amount.toLocaleString('en-IN') %></span>
+      </div>
+      <div style="font-size:.78rem;color:var(--dark4);margin-top:.25rem;">
+        ✅ ₹<%= (selectedBid.amount - Math.round(selectedBid.amount*0.1)).toLocaleString('en-IN') %> released to freelancer upon project completion
+      </div>
+    </div>
+  </div>
+
+  <% if (!stripeAvailable) { %>
+    <!-- Demo mode: no Stripe key configured -->
+    <div class="card" style="border:2px solid #fcd34d;background:#fffbeb;margin-bottom:1.25rem;">
+      <div style="display:flex;gap:.75rem;align-items:flex-start;">
+        <span style="font-size:1.5rem;">⚠️</span>
+        <div>
+          <div style="font-weight:700;margin-bottom:.3rem;">Demo Mode — Stripe not configured</div>
+          <div style="font-size:.88rem;color:var(--dark3);">
+            Add <code>STRIPE_SECRET_KEY</code> and <code>STRIPE_PUBLIC_KEY</code> to your <code>.env</code> file to enable real payments.
+            <br>For now, clicking below will simulate a successful payment.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="demo-pay-area">
+      <button id="demo-pay-btn" class="btn btn-primary btn-lg" style="width:100%;">
+        🔒 Simulate Payment — ₹<%= selectedBid.amount.toLocaleString('en-IN') %>
+      </button>
+    </div>
+    <script>
+      document.getElementById('demo-pay-btn').addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = 'Processing…';
+        const res = await fetch('/client/projects/<%= project._id %>/pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.simulated && data.redirect) {
+          window.location.href = data.redirect + '?paid=1';
+        } else {
+          alert(data.error || 'Payment failed');
+          this.disabled = false;
+          this.textContent = 'Simulate Payment';
+        }
+      });
+    </script>
+
+  <% } else { %>
+    <!-- Real Stripe Checkout -->
+    <div class="card">
+      <div style="font-size:.78rem;font-weight:700;color:var(--dark4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;">Card Details</div>
+
+      <div style="margin-bottom:1rem;padding:.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:#f9fafb;">
+        <div style="font-size:.8rem;color:var(--dark4);margin-bottom:.5rem;">Test cards (Stripe test mode):</div>
+        <code style="font-size:.8rem;">4242 4242 4242 4242</code> — Success<br>
+        <code style="font-size:.8rem;">4000 0027 6000 3184</code> — 3D Secure<br>
+        <code style="font-size:.8rem;">4000 0000 0000 0002</code> — Decline<br>
+        <span style="font-size:.78rem;color:var(--dark4);">Any future date, any CVC</span>
+      </div>
+
+      <div id="payment-element" style="margin-bottom:1rem;"></div>
+      <div id="payment-message" style="display:none;color:#dc2626;font-size:.88rem;margin-bottom:.75rem;"></div>
+      <button id="submit-btn" class="btn btn-primary btn-lg" style="width:100%;">
+        🔒 Pay ₹<%= selectedBid.amount.toLocaleString('en-IN') %> — Secure Checkout
+      </button>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+    (async function() {
+      const stripe = Stripe('<%= stripePublicKey %>');
+      // Create PaymentIntent
+      const res = await fetch('/client/projects/<%= project._id %>/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const { clientSecret, error } = await res.json();
+      if (error) {
+        document.getElementById('payment-message').textContent = error;
+        document.getElementById('payment-message').style.display = 'block';
+        return;
+      }
+      const elements = stripe.elements({ clientSecret });
+      const paymentElement = elements.create('payment');
+      paymentElement.mount('#payment-element');
+
+      document.getElementById('submit-btn').addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = 'Processing…';
+        const { error } = await stripe.confirmPayment({
+          elements,
+          confirmParams: { return_url: window.location.origin + '/projects/<%= project._id %>?paid=1' }
+        });
+        if (error) {
+          document.getElementById('payment-message').textContent = error.message;
+          document.getElementById('payment-message').style.display = 'block';
+          this.disabled = false;
+          this.textContent = '🔒 Pay ₹<%= selectedBid.amount.toLocaleString("en-IN") %>';
+        }
+      });
+    })();
+    </script>
+  <% } %>
+
+  <div style="text-align:center;margin-top:1rem;">
+    <a href="/projects/<%= project._id %>" style="font-size:.85rem;color:var(--dark4);">← Back to Project</a>
+  </div>
+
+  <div style="margin-top:1.5rem;padding:1rem;background:#f0fdf4;border-radius:10px;border:1px solid #86efac;">
+    <div style="font-size:.85rem;color:#166534;">
+      🔒 <strong>Escrow Protection:</strong> Your payment is held securely and only released to the freelancer when you mark the project as complete. If there's a dispute, our team will review.
+    </div>
+  </div>
+</div>
+<%- include('../layout/footer') %>

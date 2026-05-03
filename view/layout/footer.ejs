@@ -1,0 +1,120 @@
+<footer class="bg-white pt-5 pb-4 mt-5 border-top">
+    <div class="container text-center text-md-start">
+        <div class="row gy-4">
+            <div class="col-md-4 col-lg-4">
+                <a class="navbar-brand fw-bold text-primary fs-4 d-block mb-3" href="#">
+                    <i class="bi bi-hexagon-fill me-2"></i>FreelancerHub
+                </a>
+                <p class="text-muted pe-lg-5" style="font-size: 0.95rem; line-height: 1.6;">
+                    The world's work marketplace. Connect with top talent and specialized agencies for all your project needs.
+                </p>
+                <div class="d-flex gap-3 mt-4">
+                    <a href="#" class="text-muted fs-5 hover-primary"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-muted fs-5 hover-primary"><i class="bi bi-linkedin"></i></a>
+                    <a href="#" class="text-muted fs-5 hover-primary"><i class="bi bi-github"></i></a>
+                    <a href="#" class="text-muted fs-5 hover-primary"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <h6 class="fw-bold mb-4">Resources</h6>
+                <ul class="list-unstyled d-grid gap-2">
+                    <li><a href="#" class="text-muted text-decoration-none small">Help & Support</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Success Stories</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Freelance Reviews</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Resources</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <h6 class="fw-bold mb-4">Company</h6>
+                <ul class="list-unstyled d-grid gap-2">
+                    <li><a href="#" class="text-muted text-decoration-none small">About Us</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Trust & Safety</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Terms of Service</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none small">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-4 col-lg-4">
+                <h6 class="fw-bold mb-4">Contact Us</h6>
+                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Kolkata, WB 711202, IN</p>
+                <p class="text-muted small mb-3"><i class="bi bi-envelope-fill text-primary me-2"></i> support@freelancerhub.com</p>
+                <div class="p-3 bg-light rounded-4">
+                    <p class="small fw-bold mb-2">Subscribe to our newsletter</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control border-0 bg-white" placeholder="Email address">
+                        <button class="btn btn-primary btn-sm px-3" type="button">Join</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5 opacity-25">
+
+        <div class="row align-items-center">
+            <div class="col-md-12 text-center">
+                <p class="text-muted small mb-0">
+                    © 2026 Crafted with <i class="bi bi-heart-fill text-danger mx-1"></i> by 
+                    <span class="fw-bold text-dark">Ankit Shaw</span>. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div id="toast-container"></div>
+<script>
+  // Initialize socket and expose globally
+  if (typeof io !== 'undefined') {
+    const socket = io();
+    window._socket = socket;
+    const meta = document.querySelector('meta[name="user-id"]');
+    if (meta && meta.content) {
+      socket.emit('join', meta.content);
+    }
+    socket.on('notification', function(data) {
+      showToast(data.message || data);
+      // Update notification badge if exists
+      const badge = document.getElementById('notif-badge'); // Assuming there's one, or use a generic selector
+    });
+
+    socket.on('message', function(data) {
+      // data: { senderName, content, conversationId }
+      showToast(`New message from ${data.senderName}: ${data.content.substring(0, 30)}...`);
+      
+      // Update message badge
+      let badge = document.getElementById('message-badge');
+      if (badge) {
+        let count = parseInt(badge.textContent) || 0;
+        badge.textContent = count + 1 > 9 ? '9+' : count + 1;
+      } else {
+        const link = document.getElementById('message-nav-link');
+        if (link) {
+          const newBadge = document.createElement('span');
+          newBadge.id = 'message-badge';
+          newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary';
+          newBadge.style.fontSize = '0.6rem';
+          newBadge.textContent = '1';
+          link.appendChild(newBadge);
+        }
+      }
+    });
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast show border-0 shadow-sm rounded-3 p-3 mb-2 bg-white';
+      toast.style.minWidth = '250px';
+      toast.innerHTML = `<div class="d-flex align-items-center gap-2"><i class="bi bi-info-circle text-primary"></i> <div>${msg}</div></div>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => toast.remove(), 500);
+      }, 4000);
+    }
+  }
+</script>
+<script src="/js/main.js"></script>

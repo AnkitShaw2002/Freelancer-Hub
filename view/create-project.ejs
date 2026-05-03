@@ -1,0 +1,200 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+
+<div class="page container py-5" style="max-width:800px;">
+  <div class="page-header mb-4">
+    <h1 class="fw-bold">📝 Post a New Project</h1>
+    <p class="text-muted">Describe your project and let AI help you find the right talent.</p>
+  </div>
+
+  <%- include('layout/flash') %>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4">
+    <form method="POST" action="/client/projects"> <div class="mb-4">
+        <label class="form-label fw-bold small text-uppercase">Project Title *</label>
+        <input type="text" name="title" class="form-control form-control-lg rounded-3" placeholder="e.g. Build a Full-Stack E-Commerce Website" required maxlength="150">
+        <div class="form-text">A clear title helps freelancers understand your core needs immediately.</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold small text-uppercase">Description *</label>
+        <textarea name="description" class="form-control rounded-3" rows="8" placeholder="Describe your project in detail:&#10;• Goals and requirements&#10;• Specific technologies needed&#10;• Expected deliverables" required></textarea>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-uppercase">Category *</label>
+          <select name="category" class="form-select rounded-3" required>
+            <option value="">Select category</option>
+            <% categories.forEach(c => { %>
+              <option value="<%= c %>"><%= c %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-uppercase">Experience Level *</label>
+          <select name="experience" class="form-select rounded-3">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="expert">Expert</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold small text-uppercase">Required Skills</label>
+        <input type="text" name="skills" class="form-control rounded-3" placeholder="Node.js, React, MongoDB (comma separated)">
+        <div class="form-text text-primary-emphasis"><i class="bi bi-stars"></i> Tip: If left blank, AI will suggest skills based on your description.</div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-uppercase">Budget Type</label>
+          <select name="budget_type" class="form-select rounded-3">
+            <option value="fixed">Fixed Price</option>
+            <option value="hourly">Hourly Rate</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-uppercase">Deadline</label>
+          <input type="date" name="deadline" class="form-control rounded-3" min="<%= new Date().toISOString().split('T')[0] %>">
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-6">
+          <label class="form-label fw-bold small text-uppercase">Min Budget (₹) *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">₹</span>
+            <input type="number" name="budget_min" class="form-control rounded-3 border-start-0" placeholder="500" min="1" required>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <label class="form-label fw-bold small text-uppercase">Max Budget (₹) *</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">₹</span>
+            <input type="number" name="budget_max" class="form-control rounded-3 border-start-0" placeholder="2000" min="1" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4 pt-3 border-top">
+        <label class="form-label fw-bold text-dark"><i class="bi bi-flag-fill me-1 text-primary"></i> Project Milestones</label>
+        <div class="small text-muted mb-3">Break down the project into manageable payment phases.</div>
+        
+        <div id="milestones-list" class="d-flex flex-column gap-3"></div>
+        
+        <button type="button" id="add-milestone-btn" class="btn btn-outline-primary btn-sm mt-3 rounded-pill">
+          <i class="bi bi-plus-circle me-1"></i> Add Milestone
+        </button>
+        <input type="hidden" name="milestones" id="milestones-hidden" value="[]">
+      </div>
+
+      <div class="d-flex gap-2 pt-4 border-top">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">🚀 Post Project</button>
+        <a href="/dashboard" class="btn btn-light btn-lg px-5 rounded-pill">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .milestone-card {
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 140px 160px 45px;
+    gap: 1rem;
+    align-items: end;
+  }
+  @media(max-width: 768px) {
+    .milestone-card { grid-template-columns: 1fr 1fr; }
+  }
+  .remove-ms-btn {
+    background: #fff5f5;
+    border: 1px solid #ffe3e3;
+    color: #e03131;
+    border-radius: 8px;
+    width: 45px;
+    height: 40px;
+    transition: all 0.2s;
+  }
+  .remove-ms-btn:hover { background: #fa5252; color: white; }
+</style>
+
+<script>
+(function(){
+  const list = document.getElementById('milestones-list');
+  const hidden = document.getElementById('milestones-hidden');
+  const addBtn = document.getElementById('add-milestone-btn');
+  let milestones = [];
+
+  function render(){
+    list.innerHTML = '';
+    milestones.forEach(function(ms, i){
+      const card = document.createElement('div');
+      card.className = 'milestone-card shadow-sm';
+      card.innerHTML = `
+        <div>
+          <label class="small fw-bold text-muted d-block mb-1">Phase Title</label>
+          <input type="text" class="form-control form-control-sm" placeholder="e.g. UI Design" value="${escHtml(ms.title)}" data-i="${i}" data-field="title">
+        </div>
+        <div>
+          <label class="small fw-bold text-muted d-block mb-1">Amount (₹)</label>
+          <input type="number" class="form-control form-control-sm" placeholder="500" min="1" value="${ms.amount||''}" data-i="${i}" data-field="amount">
+        </div>
+        <div>
+          <label class="small fw-bold text-muted d-block mb-1">Target Date</label>
+          <input type="date" class="form-control form-control-sm" value="${ms.dueDate||''}" data-i="${i}" data-field="dueDate">
+        </div>
+        <button type="button" class="remove-ms-btn" data-i="${i}" title="Remove"><i class="bi bi-trash"></i></button>
+      `;
+      list.appendChild(card);
+    });
+    hidden.value = JSON.stringify(milestones);
+  }
+
+  function escHtml(str){ return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+  addBtn.addEventListener('click', function(){
+    milestones.push({ title:'', amount:'', dueDate:'' });
+    render();
+  });
+
+  list.addEventListener('input', function(e){
+    const i = parseInt(e.target.dataset.i);
+    if(isNaN(i)) return;
+    milestones[i][e.target.dataset.field] = e.target.value;
+    hidden.value = JSON.stringify(milestones);
+  });
+
+  list.addEventListener('click', function(e){
+    const btn = e.target.closest('.remove-ms-btn');
+    if(!btn) return;
+    const i = parseInt(btn.dataset.i);
+    milestones.splice(i, 1);
+    render();
+  });
+
+  document.querySelector('form').addEventListener('submit', function(e){
+    // Filter out completely empty milestones if they were added accidentally
+    milestones = milestones.filter(m => m.title.trim() !== '' || m.amount !== '');
+    
+    for(let i=0; i < milestones.length; i++){
+      if(!milestones[i].title.trim() || !milestones[i].amount){
+        e.preventDefault();
+        alert('Please fill in both Title and Amount for all active milestones.');
+        return;
+      }
+    }
+    hidden.value = JSON.stringify(milestones);
+  });
+})();
+</script>
+
+<%- include('layout/footer') %>

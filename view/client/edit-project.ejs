@@ -1,0 +1,152 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page" style="max-width:760px;">
+  <div class="page-header">
+    <h1>✏️ Edit Project</h1>
+    <p class="page-subtitle">Update the details of your open project.</p>
+  </div>
+  <%- include('../layout/flash') %>
+  <div class="card">
+    <form method="POST" action="/client/projects/<%= project._id %>/edit">
+      <div class="form-group">
+        <label class="form-label">Project Title *</label>
+        <input type="text" name="title" class="form-control" value="<%= project.title %>" required maxlength="150">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea name="description" class="form-control" rows="8" required><%= project.description %></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select name="category" class="form-control" required>
+            <% categories.forEach(function(c){ %>
+              <option value="<%= c %>" <%= project.category===c?'selected':'' %>><%= c %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Freelancer Experience</label>
+          <select name="experience" class="form-control">
+            <option value="beginner" <%= project.experience==='beginner'?'selected':'' %>>Beginner (0–2 years)</option>
+            <option value="intermediate" <%= project.experience==='intermediate'?'selected':'' %>>Intermediate (2–5 years)</option>
+            <option value="expert" <%= project.experience==='expert'?'selected':'' %>>Expert (5+ years)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Required Skills</label>
+        <input type="text" name="skills" class="form-control" value="<%= project.skills.join(', ') %>"
+          placeholder="Node.js, React, MongoDB (comma separated)">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Budget Type</label>
+          <select name="budget_type" class="form-control">
+            <option value="fixed" <%= project.budget.type==='fixed'?'selected':'' %>>Fixed Price</option>
+            <option value="hourly" <%= project.budget.type==='hourly'?'selected':'' %>>Hourly Rate</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deadline</label>
+          <input type="date" name="deadline" class="form-control"
+            value="<%= project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '' %>"
+            min="<%= new Date().toISOString().split('T')[0] %>">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Minimum Budget (₹) *</label>
+          <input type="number" name="budget_min" class="form-control" value="<%= project.budget.min %>" min="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Maximum Budget (₹) *</label>
+          <input type="number" name="budget_max" class="form-control" value="<%= project.budget.max %>" min="1" required>
+        </div>
+      </div>
+
+      <!-- Milestones -->
+      <div class="form-group" style="margin-top:1.25rem;">
+        <label class="form-label">📌 Milestones <span style="font-weight:400;color:var(--dark4);font-size:.85rem;">(optional)</span></label>
+        <div id="milestones-list" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+        <button type="button" id="add-milestone-btn" class="btn btn-ghost btn-sm" style="margin-top:.5rem;">+ Add Milestone</button>
+        <input type="hidden" name="milestones" id="milestones-hidden"
+          value="<%= JSON.stringify(project.milestones.map(function(m){ return {title:m.title,amount:m.amount,dueDate:m.dueDate?new Date(m.dueDate).toISOString().split('T')[0]:''} })) %>">
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+        <button type="submit" class="btn btn-primary btn-lg">💾 Save Changes</button>
+        <a href="/projects/<%= project._id %>" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.milestone-card{background:var(--light2,#f8f9fa);border:1px solid var(--border,#e5e7eb);border-radius:10px;padding:1rem;display:grid;grid-template-columns:1fr 120px 160px 36px;gap:.75rem;align-items:end;}
+@media(max-width:600px){.milestone-card{grid-template-columns:1fr 1fr;}}
+.milestone-card label{font-size:.8rem;font-weight:600;color:var(--dark3,#374151);display:block;margin-bottom:.25rem;}
+.milestone-card input{width:100%;padding:.45rem .65rem;border:1px solid var(--border,#e5e7eb);border-radius:7px;font-size:.88rem;}
+.milestone-card input:focus{outline:none;border-color:var(--primary,#6366f1);}
+.remove-ms-btn{background:#fee2e2;border:none;color:#dc2626;border-radius:7px;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+.remove-ms-btn:hover{background:#fecaca;}
+</style>
+
+<script>
+(function(){
+  const list   = document.getElementById('milestones-list');
+  const hidden = document.getElementById('milestones-hidden');
+  const addBtn = document.getElementById('add-milestone-btn');
+  let milestones = [];
+  try { milestones = JSON.parse(hidden.value) || []; } catch(e){ milestones=[]; }
+
+  function escHtml(str){ return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+  function render(){
+    list.innerHTML = '';
+    milestones.forEach(function(ms, i){
+      const card = document.createElement('div');
+      card.className = 'milestone-card';
+      card.innerHTML = `
+        <div><label>Title</label><input type="text" placeholder="e.g. UI Design" value="${escHtml(ms.title)}" data-i="${i}" data-field="title"></div>
+        <div><label>Amount (₹)</label><input type="number" placeholder="500" min="1" value="${ms.amount||''}" data-i="${i}" data-field="amount"></div>
+        <div><label>Due Date</label><input type="date" value="${ms.dueDate||''}" data-i="${i}" data-field="dueDate"></div>
+        <button type="button" class="remove-ms-btn" data-i="${i}" title="Remove">✕</button>
+      `;
+      list.appendChild(card);
+    });
+    hidden.value = JSON.stringify(milestones);
+  }
+
+  addBtn.addEventListener('click', function(){ milestones.push({title:'',amount:'',dueDate:''}); render(); });
+
+  list.addEventListener('input', function(e){
+    const i = parseInt(e.target.dataset.i);
+    if(isNaN(i)) return;
+    milestones[i][e.target.dataset.field] = e.target.value;
+    hidden.value = JSON.stringify(milestones);
+  });
+
+  list.addEventListener('click', function(e){
+    const btn = e.target.closest('.remove-ms-btn');
+    if(!btn) return;
+    milestones.splice(parseInt(btn.dataset.i), 1);
+    render();
+  });
+
+  document.querySelector('form').addEventListener('submit', function(e){
+    for(let i=0;i<milestones.length;i++){
+      if(!milestones[i].title.trim()||!milestones[i].amount){
+        e.preventDefault();
+        alert('Please fill in Title and Amount for all milestones, or remove incomplete ones.');
+        return;
+      }
+    }
+    hidden.value = JSON.stringify(milestones);
+  });
+
+  render();
+})();
+</script>
+
+<%- include('../layout/footer') %>

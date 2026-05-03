@@ -1,0 +1,47 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div><h1>👥 Manage Users</h1><p class="page-subtitle"><%= total %> users total</p></div>
+    <a href="/admin" class="btn btn-ghost btn-sm">← Admin Home</a>
+  </div>
+  <%- include('../layout/flash') %>
+  <form method="GET" action="/admin/users" class="filter-bar">
+    <div class="filter-grid">
+      <div class="filter-group" style="flex:2;"><label class="filter-label">Search</label><input type="text" name="search" class="form-control" value="<%= query.search||'' %>" placeholder="Name or email..."></div>
+      <div class="filter-group"><label class="filter-label">Role</label><select name="role" class="form-control"><option value="">All Roles</option><option value="freelancer" <%= query.role==='freelancer'?'selected':'' %>>Freelancer</option><option value="client" <%= query.role==='client'?'selected':'' %>>Client</option><option value="admin" <%= query.role==='admin'?'selected':'' %>>Admin</option></select></div>
+      <div class="filter-group" style="flex-direction:row;align-items:flex-end;gap:.5rem;"><button type="submit" class="btn btn-primary">Filter</button><a href="/admin/users" class="btn btn-ghost">Reset</a></div>
+    </div>
+  </form>
+  <div class="card" style="padding:0;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>User</th><th>Role</th><th>Rating</th><th>Projects</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td><strong><%= u.name %></strong><br><span class="text-muted" style="font-size:.75rem;"><%= u.email %></span></td>
+              <td><span class="badge badge-primary"><%= u.role %></span></td>
+              <td><% if(u.avgRating>0){ %><span style="color:#fbbf24;">⭐ <%= u.avgRating.toFixed(1) %></span><% }else{%>—<%}%></td>
+              <td><%= u.completedProjects||0 %></td>
+              <td><span style="color:<%= u.isBanned?'var(--danger)':'var(--success)' %>;font-weight:600;"><%= u.isBanned?'🚫 Banned':'✅ Active' %></span></td>
+              <td class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+              <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+                <a href="/profile/<%= u._id %>" class="btn btn-ghost btn-sm">View</a>
+                <% if (u.role !== 'admin') { %>
+                  <form method="POST" action="/admin/users/<%= u._id %>/toggle-ban" style="display:inline;">
+                    <button type="submit" class="btn <%= u.isBanned?'btn-success':'btn-danger' %> btn-sm"><%= u.isBanned?'Unban':'Ban' %></button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% if (totalPages > 1) { %>
+    <div class="pagination"><% for(let i=1;i<=totalPages;i++){%><a href="?<%= new URLSearchParams({...query,page:i}).toString() %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a><%}%></div>
+  <% } %>
+</div>
+<%- include('../layout/footer') %>

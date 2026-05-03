@@ -1,0 +1,131 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page">
+  
+ <%- include('layout/flash') %>
+  <div class="page-header">
+    <h1>👋 Welcome back, <%= currentUser.name.split(' ')[0] %>!</h1>
+    <p class="page-subtitle"><%= currentUser.role === 'client' ? 'Manage your projects and find the best talent.' : currentUser.role === 'admin' ? 'Platform overview and management.' : 'Track your bids, active work, and earnings.' %></p>
+  </div>
+
+  <% if (currentUser.role === 'client') { %>
+    <div class="grid-4 mb-3">
+      <div class="stat-card"><div class="stat-icon blue">📋</div><div><div class="stat-value"><%= totalProjects||0 %></div><div class="stat-label">Total Projects</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">🟢</div><div><div class="stat-value"><%= openProjects||0 %></div><div class="stat-label">Open</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">🎯</div><div><div class="stat-value"><%= totalBidsReceived||0 %></div><div class="stat-label">Bids Received</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple">✅</div><div><div class="stat-value"><%= completedProjects||0 %></div><div class="stat-label">Completed</div></div></div>
+    </div>
+    <div class="flex-between mb-3">
+      <h2>Recent Projects</h2>
+      <div style="display:flex;gap:.75rem;">
+        <a href="/client/projects" class="btn btn-ghost btn-sm">View All</a>
+        <a href="/client/projects/create" class="btn btn-primary btn-sm">+ Post New</a>
+      </div>
+    </div>
+    <% if (myProjects && myProjects.length > 0) { %>
+      <div class="card" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Project</th><th>Status</th><th>Budget</th><th>Bids</th><th>Posted</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% myProjects.forEach(p => { %>
+                <tr>
+                  <td><a href="/projects/<%= p._id %>" style="font-weight:600;color:var(--dark)"><%= p.title %></a><br><span class="text-muted"><%= p.category %></span></td>
+                  <td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td>
+                  <td>₹<%= p.budget.min.toLocaleString() %>–₹<%= p.budget.max.toLocaleString() %></td>
+                  <td><strong><%= p.totalBids %></strong></td>
+                  <td class="text-muted"><%= new Date(p.createdAt).toLocaleDateString() %></td>
+                  <td><a href="/projects/<%= p._id %>" class="btn btn-ghost btn-sm">View</a></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="empty-state card"><div class="icon">📭</div><h3>No projects yet</h3><p>Post your first project and start receiving bids</p><a href="/client/projects/create" class="btn btn-primary mt-2">Post a Project</a></div>
+    <% } %>
+
+  <% } else if (currentUser.role === 'freelancer') { %>
+    <div class="grid-4 mb-3">
+      <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-value">₹<%= (currentUser.walletBalance||0).toLocaleString() %></div><div class="stat-label">Wallet</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">📤</div><div><div class="stat-value"><%= totalBids||0 %></div><div class="stat-label">Total Bids</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">⚡</div><div><div class="stat-value"><%= activeProjects&&activeProjects.length||0 %></div><div class="stat-label">Active</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple">✅</div><div><div class="stat-value"><%= completedProjects||0 %></div><div class="stat-label">Completed</div></div></div>
+    </div>
+    <% if (activeProjects && activeProjects.length > 0) { %>
+      <h2 style="margin-bottom:1rem;">Active Work</h2>
+      <div class="grid-projects mb-3">
+        <% activeProjects.forEach(p => { %>
+          <div class="project-card">
+            <div class="project-card-header">
+              <div class="project-card-title"><a href="/projects/<%= p._id %>"><%= p.title %></a></div>
+              <span class="badge badge-<%= p.status %>"><%= p.status %></span>
+            </div>
+            <div class="text-muted" style="font-size:.85rem;">Client: <%= p.clientName %></div>
+            <div class="project-card-footer">
+              <span class="budget-badge">₹<%= p.budget.min.toLocaleString() %>–₹<%= p.budget.max.toLocaleString() %></span>
+              <a href="/projects/<%= p._id %>" class="btn btn-primary btn-sm">View →</a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+    <div class="flex-between mb-3">
+      <h2>Recent Applications</h2>
+      <a href="/freelancer/bids" class="btn btn-ghost btn-sm">All Bids</a>
+    </div>
+    <% if (appliedProjects && appliedProjects.length > 0) { %>
+      <div class="card" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Project</th><th>Status</th><th>Your Bid</th><th>Date</th></tr></thead>
+            <tbody>
+              <% appliedProjects.forEach(p => { const myBid = p.bids.find(b=>b.freelancerId.toString()===currentUser._id.toString()); %>
+                <tr>
+                  <td><a href="/projects/<%= p._id %>" style="font-weight:600;color:var(--dark)"><%= p.title %></a></td>
+                  <td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td>
+                  <td><% if(myBid){ %><strong>₹<%= myBid.amount.toLocaleString() %></strong> · <span class="badge badge-<%= myBid.status %>"><%= myBid.status %></span><% } %></td>
+                  <td class="text-muted"><%= myBid ? new Date(myBid.createdAt).toLocaleDateString() : '' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="empty-state card"><div class="icon">🔍</div><h3>No bids yet</h3><p>Browse open projects and start bidding</p><a href="/projects" class="btn btn-primary mt-2">Browse Projects</a></div>
+    <% } %>
+
+  <% } else if (currentUser.role === 'admin') { %>
+    <div class="grid-4 mb-3">
+      <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value"><%= totalUsers||0 %></div><div class="stat-label">Total Users</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">📋</div><div><div class="stat-value"><%= totalProjects||0 %></div><div class="stat-label">Projects</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">🟢</div><div><div class="stat-value"><%= openProjects||0 %></div><div class="stat-label">Open</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple">✅</div><div><div class="stat-value"><%= completedProjects||0 %></div><div class="stat-label">Completed</div></div></div>
+    </div>
+    <div class="grid-2 gap-2">
+      <div>
+        <div class="flex-between mb-2"><h3>Recent Users</h3><a href="/admin/users" class="btn btn-ghost btn-sm">Manage →</a></div>
+        <div class="card" style="padding:0;">
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Joined</th></tr></thead><tbody>
+          <% (recentUsers||[]).forEach(u => { %>
+            <tr><td><strong><%= u.name %></strong><br><span class="text-muted" style="font-size:.78rem;"><%= u.email %></span></td><td><span class="badge badge-primary"><%= u.role %></span></td><td class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></td></tr>
+          <% }) %>
+          </tbody></table></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex-between mb-2"><h3>Recent Projects</h3><a href="/admin/projects" class="btn btn-ghost btn-sm">Manage →</a></div>
+        <div class="card" style="padding:0;">
+          <div class="table-wrap"><table><thead><tr><th>Title</th><th>Status</th><th>Date</th></tr></thead><tbody>
+          <% (recentProjects||[]).forEach(p => { %>
+            <tr><td><a href="/projects/<%= p._id %>"><%= p.title.substring(0,35) %><%= p.title.length>35?'...':'' %></a></td><td><span class="badge badge-<%= p.status %>"><%= p.status %></span></td><td class="text-muted"><%= new Date(p.createdAt).toLocaleDateString() %></td></tr>
+          <% }) %>
+          </tbody></table></div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+<%- include('layout/footer') %>

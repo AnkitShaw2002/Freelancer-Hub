@@ -1,0 +1,78 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page">
+  <%- include('layout/flash') %>
+  <div class="profile-header mb-2">
+    <% if (profileUser.avatar) { %>
+      <img src="<%= profileUser.avatar %>" alt="" class="avatar-lg">
+    <% } else { %>
+      <div class="avatar-lg-placeholder"><%= profileUser.name.charAt(0).toUpperCase() %></div>
+    <% } %>
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <div class="profile-name"><%= profileUser.name %></div>
+        <span style="background:rgba(255,255,255,.15);color:#fff;padding:.2rem .75rem;border-radius:100px;font-size:.78rem;text-transform:uppercase;letter-spacing:1px;"><%= profileUser.role %></span>
+        <% if (profileUser.isVerified) { %><span style="background:rgba(16,185,129,.2);color:#6ee7b7;padding:.2rem .75rem;border-radius:100px;font-size:.78rem;">✓ Verified</span><% } %>
+      </div>
+      <% if (profileUser.category) { %><div style="color:rgba(255,255,255,.7);margin-top:.3rem;font-size:.92rem;"><%= profileUser.category %></div><% } %>
+      <% if (profileUser.location) { %><div style="color:rgba(255,255,255,.6);font-size:.85rem;">📍 <%= profileUser.location %></div><% } %>
+      <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;">
+        <% if (profileUser.avgRating > 0) { %>
+          <div><div style="font-family:var(--font-heading);font-size:1.4rem;font-weight:800;color:#fbbf24;"><%= profileUser.avgRating.toFixed(1) %> ⭐</div><div style="color:rgba(255,255,255,.5);font-size:.75rem;"><%= profileUser.totalReviews %> reviews</div></div>
+        <% } %>
+        <div><div style="font-family:var(--font-heading);font-size:1.4rem;font-weight:800;color:#fff;"><%= profileUser.completedProjects||0 %></div><div style="color:rgba(255,255,255,.5);font-size:.75rem;">Completed</div></div>
+        <% if (profileUser.hourlyRate > 0) { %><div><div style="font-family:var(--font-heading);font-size:1.4rem;font-weight:800;color:#fff;">₹<%= profileUser.hourlyRate %>/hr</div><div style="color:rgba(255,255,255,.5);font-size:.75rem;">Rate</div></div><% } %>
+      </div>
+    </div>
+    <% if (isOwn) { %><a href="/profile/edit" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4);align-self:flex-start;">✏️ Edit Profile</a><% } %>
+  </div>
+
+  <div class="sidebar-layout">
+    <div>
+      <% if (profileUser.bio) { %>
+        <div class="card mb-2"><h3 style="margin-bottom:.75rem;">About</h3><p style="color:var(--dark3);line-height:1.8;"><%= profileUser.bio %></p></div>
+      <% } %>
+      <% if (profileUser.skills && profileUser.skills.length > 0) { %>
+        <div class="card mb-2">
+          <h3 style="margin-bottom:.75rem;">🛠 Skills</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+            <% profileUser.skills.forEach(s=>{%><span class="skill-tag" style="font-size:.88rem;padding:.35rem .85rem;"><%= s %></span><%})%>
+          </div>
+        </div>
+      <% } %>
+      <% if (reviews && reviews.length > 0) { %>
+        <div class="card">
+          <h3 style="margin-bottom:1rem;">⭐ Reviews (<%= reviews.length %>)</h3>
+          <% reviews.forEach(r => { %>
+            <div style="padding:1rem 0;border-bottom:1px solid var(--lighter);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;">
+                <strong><%= r.reviewerName %></strong>
+                <div style="color:#fbbf24;"><%= '⭐'.repeat(r.rating) %></div>
+              </div>
+              <p style="font-size:.88rem;color:var(--dark3);">/<%= r.comment %>/</p>
+              <div class="text-muted" style="font-size:.75rem;margin-top:.3rem;">on "<%= r.projectTitle %>" · <%= new Date(r.createdAt).toLocaleDateString() %></div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+    <div>
+      <% if (!isOwn && currentUser) { %>
+        <div class="card mb-2">
+          <a href="/messages/<%= profileUser._id %>" class="btn btn-primary btn-block">💬 Send Message</a>
+        </div>
+      <% } %>
+      <div class="card">
+        <h4 style="margin-bottom:1rem;">Account Info</h4>
+        <div style="display:flex;flex-direction:column;gap:.6rem;font-size:.88rem;">
+          <div style="display:flex;justify-content:space-between;"><span class="text-muted">Member since</span><strong><%= new Date(profileUser.createdAt).toLocaleDateString() %></strong></div>
+          <% if (profileUser.role === 'freelancer') { %>
+            <div style="display:flex;justify-content:space-between;"><span class="text-muted">Experience</span><span class="badge badge-<%= profileUser.experience %>"><%= profileUser.experience %></span></div>
+            <div style="display:flex;justify-content:space-between;"><span class="text-muted">Available</span><span style="color:<%= profileUser.availability?'var(--success)':'var(--danger)' %>"><%= profileUser.availability?'✅ Yes':'❌ No' %></span></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('layout/footer') %>

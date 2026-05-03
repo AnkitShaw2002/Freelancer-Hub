@@ -1,0 +1,46 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page">
+  <div class="page-header"><h1>Find Freelancers</h1><p class="page-subtitle"><%= total %> skilled professionals</p></div>
+  <form method="GET" action="/freelancers" class="filter-bar">
+    <div class="filter-grid">
+      <div class="filter-group" style="flex:2;"><label class="filter-label">Search</label><input type="text" name="search" class="form-control" value="<%= query.search||'' %>" placeholder="Name, skills, bio..."></div>
+      <div class="filter-group"><label class="filter-label">Skills</label><input type="text" name="skills" class="form-control" value="<%= query.skills||'' %>" placeholder="Node.js, React..."></div>
+      <div class="filter-group"><label class="filter-label">Experience</label><select name="experience" class="form-control"><option value="">Any</option><option value="beginner" <%= query.experience==='beginner'?'selected':'' %>>Beginner</option><option value="intermediate" <%= query.experience==='intermediate'?'selected':'' %>>Intermediate</option><option value="expert" <%= query.experience==='expert'?'selected':'' %>>Expert</option></select></div>
+      <div class="filter-group" style="flex-direction:row;align-items:flex-end;gap:.5rem;"><button type="submit" class="btn btn-primary">Search</button><a href="/freelancers" class="btn btn-ghost">Reset</a></div>
+    </div>
+  </form>
+  <% if (freelancers.length === 0) { %>
+    <div class="empty-state card"><div class="icon">👥</div><h3>No freelancers found</h3><p>Try adjusting your filters</p></div>
+  <% } else { %>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
+      <% freelancers.forEach(f => { %>
+        <div class="freelancer-card">
+          <% if (f.avatar) { %><img src="<%= f.avatar %>" class="avatar"><% } else { %><div class="avatar-p"><%= f.name.charAt(0) %></div><% } %>
+          <a href="/profile/<%= f._id %>" style="font-weight:800;font-size:1rem;color:var(--dark);display:block;margin-bottom:.25rem;"><%= f.name %></a>
+          <% if (f.category) { %><div class="text-muted" style="font-size:.82rem;margin-bottom:.4rem;"><%= f.category %></div><% } %>
+          <% if (f.avgRating > 0) { %><div style="color:#fbbf24;font-size:.85rem;margin-bottom:.5rem;">⭐ <%= f.avgRating.toFixed(1) %> (<%= f.totalReviews %> reviews)</div><% } %>
+          <div style="display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-bottom:.75rem;">
+            <% (f.skills||[]).slice(0,4).forEach(s=>{%><span class="skill-tag"><%= s %></span><%})%>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;width:100%;font-size:.82rem;margin-bottom:.75rem;">
+            <span class="badge badge-<%= f.experience %>"><%= f.experience %></span>
+            <% if (f.hourlyRate > 0) { %><strong>₹<%= f.hourlyRate %>/hr</strong><% } %>
+          </div>
+          <div style="display:flex;gap:.5rem;width:100%;">
+            <a href="/profile/<%= f._id %>" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">View Profile</a>
+            <% if (currentUser && currentUser._id.toString() !== f._id.toString()) { %>
+              <a href="/messages/<%= f._id %>" class="btn btn-ghost btn-sm">💬</a>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% for(let i=1;i<=totalPages;i++){%><a href="?<%= new URLSearchParams({...query,page:i}).toString() %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a><%}%>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+<%- include('layout/footer') %>

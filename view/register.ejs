@@ -1,0 +1,211 @@
+<%- include('layout/header') %>
+    <%- include('layout/flash') %>
+
+        <body class="bg-main">
+    <%- include('layout/navbar') %>
+
+            <div class="container register-container py-5">
+                <div class="row w-100 align-items-center">
+                    <div class="col-lg-5 d-none d-lg-block">
+                        <span class="badge bg-primary-soft text-primary px-3 py-2 rounded-pill mb-3">Join Our
+                            Community</span>
+                        <h1 class="display-5 fw-bold mb-3">Create your account and start <span class="text-primary">your
+                                journey</span></h1>
+                        <p class="text-muted mb-5">Join thousands of freelancers and clients building amazing things
+                            together.</p>
+
+                        <div class="d-flex align-items-start gap-3 mb-4">
+                            <div class="icon-box-sm bg-primary-soft text-primary rounded-circle p-4"><i
+                                    class="bi bi-shield-lock"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Secure & Trusted</h6>
+                                <p class="small text-muted">Your data is protected with enterprise-grade security and
+                                    privacy.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-3 mb-4">
+                            <div class="icon-box-sm bg-primary-soft text-primary rounded-circle p-4"><i
+                                    class="bi bi-briefcase"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Find Opportunities</h6>
+                                <p class="small text-muted">Access thousands of projects and talented freelancers
+                                    worldwide.</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 position-relative">
+                            <img src="/images/hero-man.png" class="img-fluid rounded-4" style="max-width: 300px;"
+                                alt="User">
+                            <div class="floating-card p-2 shadow-sm animate-up-down"
+                                style="bottom: 10%; right: 20%; width: 150px;">
+                                <span class="small text-warning"><i class="bi bi-star-fill"></i> 5.0 Review</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 offset-lg-1">
+                        <div class="auth-card p-4 p-md-5">
+                            <div class="text-center mb-4">
+                                <h2 class="fw-bold">Create Account</h2>
+                                <p class="text-muted small">Fill in the details below to get started</p>
+                            </div>
+
+                            <form action="/auth/register-create" method="POST">
+                                <div class="role-selector">
+                                    <button type="button" class="role-btn active" id="btn-freelancer" data-role="freelancer">
+                                        <i class="bi bi-person-walking me-2"></i>I'm a Freelancer
+                                    </button>
+                                    <button type="button" class="role-btn" id="btn-client" data-role="client">
+                                        <i class="bi bi-building me-2"></i>I'm a Client
+                                    </button>
+                                    <input type="hidden" name="role" id="userRole" value="freelancer">
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" name="firstName"
+                                            placeholder="Enter your first name" required>
+
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" name="lastName"
+                                            placeholder="Enter your last name" required>
+                                    </div>
+                                    <div class=" mb-3">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" name="email"
+                                            placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control border-end-0" id="password"
+                                            name="password" placeholder="Create a strong password" required>
+                                        <span
+                                            class="input-group-text bg-main border-start-0 cursor-pointer toggle-password"
+                                            data-target="password">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control border-end-0" id="confirmPassword"
+                                            placeholder="Confirm your password" required>
+                                        <span
+                                            class="input-group-text bg-main border-start-0 cursor-pointer toggle-password"
+                                            data-target="confirmPassword">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Role Category</label>
+                                    <select class="form-select" name="category">
+                                        <option selected disabled>Select your role</option>
+                                        <option>Web Developer</option>
+                                        <option>Graphic Designer</option>
+                                        <option>Content Writer</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="terms" required>
+                                    <label class="form-check-label small text-muted" for="terms">
+                                        I agree to the <a href="#" class="text-primary text-decoration-none">Terms of
+                                            Use</a> and <a href="#" class="text-primary text-decoration-none">Privacy
+                                            Policy</a>
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-4">Create
+                                    Account</button>
+
+                                <div class="text-center position-relative mb-4">
+                                    <hr>
+                                    <span
+                                        class="position-absolute top-50 start-50 translate-middle bg-card px-3 text-muted small">or
+                                        continue with</span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <button type="button" class="social-btn">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png"
+                                                width="18" alt="Google"> Google
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="social-btn">
+                                            <i class="bi bi-github"></i> GitHub
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p class="text-center mt-4 mb-0 small text-muted">
+                                    Already have an account? <a href="/login"
+                                        class="text-primary fw-bold text-decoration-none">Login</a>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    // 1. ROLE SELECTOR (FIXED FOR CSP)
+                    const btnFreelancer = document.getElementById('btn-freelancer');
+                    const btnClient = document.getElementById('btn-client');
+                    const roleInput = document.getElementById('userRole');
+
+                    if (btnFreelancer && btnClient) {
+                        btnFreelancer.addEventListener('click', () => {
+                            btnFreelancer.classList.add('active');
+                            btnClient.classList.remove('active');
+                            roleInput.value = 'freelancer';
+                        });
+                        btnClient.addEventListener('click', () => {
+                            btnClient.classList.add('active');
+                            btnFreelancer.classList.remove('active');
+                            roleInput.value = 'client';
+                        });
+                    }
+
+                    // 3. PASSWORD VISIBILITY (FIXED FOR CSP)
+                    const toggleButtons = document.querySelectorAll('.toggle-password');
+
+                    toggleButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            const targetId = this.getAttribute('data-target');
+                            const input = document.getElementById(targetId);
+                            const icon = this.querySelector('i');
+
+                            if (input.type === 'password') {
+                                input.type = 'text';
+                                icon.classList.replace('bi-eye', 'bi-eye-slash');
+                            } else {
+                                input.type = 'password';
+                                icon.classList.replace('bi-eye-slash', 'bi-eye');
+                            }
+                        });
+                    });
+                });
+            </script>
+    <%- include('layout/footer') %>
+        </body>
+</html>

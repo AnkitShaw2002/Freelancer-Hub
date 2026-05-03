@@ -1,0 +1,83 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+
+<div class="page py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <div class="text-center mb-4">
+                        <div class="avatar-lg-placeholder mx-auto mb-3">
+                            <%= currentUser.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <h5 class="fw-bold mb-0"><%= currentUser.name %></h5>
+                        <p class="text-muted small"><%= currentUser.email %></p>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/profile" class="list-group-item list-group-item-action border-0 px-0">
+                            <i class="bi bi-person me-2"></i> Profile Details
+                        </a>
+                        <a href="/settings" class="list-group-item list-group-item-action border-0 px-0 active bg-primary-soft text-primary">
+                            <i class="bi bi-gear me-2"></i> Account Settings
+                        </a>
+                        <a href="/notifications" class="list-group-item list-group-item-action border-0 px-0">
+                            <i class="bi bi-bell me-2"></i> Notifications
+                        </a>
+                        <a href="/auth/logout" class="list-group-item list-group-item-action border-0 px-0 text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <%- include('layout/flash') %>
+                <div class="card border-0 shadow-sm p-4">
+                    <h4 class="fw-bold mb-4">Account Settings</h4>
+                    
+                    <form action="/profile/update" method="POST">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="name" class="form-control" value="<%= currentUser.name %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" value="<%= currentUser.email %>" disabled>
+                                <small class="text-muted">Email cannot be changed.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Bio / Description</label>
+                            <textarea name="bio" class="form-control" rows="4"><%= currentUser.bio || '' %></textarea>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h5 class="fw-bold mb-3">Notification Preferences</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="notif_email" checked>
+                            <label class="form-check-label" for="notif_email">
+                                Email notifications for new bids/messages
+                            </label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="notif_browser" checked>
+                            <label class="form-check-label" for="notif_browser">
+                                Browser push notifications
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-light">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('layout/footer') %>

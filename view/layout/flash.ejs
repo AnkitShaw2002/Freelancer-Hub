@@ -1,0 +1,8 @@
+<% if (typeof messages !== 'undefined') { %>
+  <% if (messages.success && messages.success.length > 0) { %>
+    <div class="alert alert-success">✅ <%= messages.success[0] %></div>
+  <% } %>
+  <% if (messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-error">❌ <%= messages.error[0] %></div>
+  <% } %>
+<% } %>

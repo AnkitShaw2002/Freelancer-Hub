@@ -1,0 +1,35 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page" style="max-width:700px;">
+  <div class="page-header"><h1>✏️ Edit Profile</h1></div>
+  <%- include('layout/flash') %>
+  <div class="card">
+    <form method="POST" action="/profile/edit" enctype="multipart/form-data">
+      <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;">
+        <% if (currentUser.avatar) { %><img src="<%= currentUser.avatar %>" style="width:72px;height:72px;border-radius:50%;object-fit:cover;"><% } else { %><div class="avatar-lg-placeholder" style="width:72px;height:72px;font-size:1.5rem;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;"><%= currentUser.name.charAt(0) %></div><% } %>
+        <div><label class="form-label">Profile Photo</label><input type="file" name="avatar" class="form-control" accept="image/*"><div class="form-hint">JPG, PNG — max 2MB</div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" name="name" class="form-control" value="<%= currentUser.name %>" required></div>
+        <div class="form-group"><label class="form-label">Location</label><input type="text" name="location" class="form-control" value="<%= currentUser.location||'' %>" placeholder="City, Country"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Bio</label><textarea name="bio" class="form-control" rows="3" maxlength="500" placeholder="Tell clients and freelancers about yourself..."><%= currentUser.bio||'' %></textarea></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="<%= currentUser.phone||'' %>" placeholder="+91 9876543210"></div>
+      <% if (currentUser.role === 'freelancer') { %>
+        <hr class="divider">
+        <h4 style="margin-bottom:1rem;color:var(--dark3);">Freelancer Settings</h4>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Category</label><select name="category" class="form-control"><option value="">Select</option><% ['Web Development','Mobile Development','Design & Creative','Writing & Content','Marketing & SEO','Data Science & AI','DevOps & Cloud','Video & Animation','Finance & Accounting','Legal','Other'].forEach(c=>{%><option value="<%= c %>" <%= currentUser.category===c?'selected':'' %>><%= c %></option><%})%></select></div>
+          <div class="form-group"><label class="form-label">Experience Level</label><select name="experience" class="form-control"><option value="beginner" <%= currentUser.experience==='beginner'?'selected':'' %>>Beginner</option><option value="intermediate" <%= currentUser.experience==='intermediate'?'selected':'' %>>Intermediate</option><option value="expert" <%= currentUser.experience==='expert'?'selected':'' %>>Expert</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Hourly Rate (₹)</label><input type="number" name="hourlyRate" class="form-control" value="<%= currentUser.hourlyRate||0 %>" min="0"></div>
+          <div class="form-group"><label class="form-label">Availability</label><div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;"><input type="checkbox" name="availability" id="avail" <%= currentUser.availability?'checked':'' %> style="width:18px;height:18px;"><label for="avail">Available for work</label></div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Skills <span class="text-muted">(comma separated)</span></label><input type="text" name="skills" class="form-control" value="<%= (currentUser.skills||[]).join(', ') %>" placeholder="Node.js, React, MongoDB..."></div>
+      <% } %>
+      <div style="display:flex;gap:1rem;margin-top:.5rem;"><button type="submit" class="btn btn-primary">Save Changes</button><a href="/profile" class="btn btn-ghost">Cancel</a></div>
+    </form>
+  </div>
+</div>
+<%- include('layout/footer') %>

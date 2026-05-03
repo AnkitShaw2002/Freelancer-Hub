@@ -1,0 +1,119 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+    <div><h1>📊 Analytics</h1><p class="page-subtitle">Platform statistics and trends</p></div>
+    <a href="/admin" class="btn btn-ghost btn-sm">← Admin Home</a>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid-4 mb-3">
+    <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value" id="s-users">—</div><div class="stat-label">Total Users</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📋</div><div><div class="stat-value" id="s-projects">—</div><div class="stat-label">Projects</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">💰</div><div><div class="stat-value" id="s-tx">—</div><div class="stat-label">Transactions</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">📈</div><div><div class="stat-value" id="s-earnings">—</div><div class="stat-label">Total Earnings</div></div></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Projects by category -->
+    <div class="card">
+      <h3 style="margin-bottom:1.5rem;">Projects by Category</h3>
+      <canvas id="categoryChart" height="280"></canvas>
+    </div>
+    <!-- Projects by status -->
+    <div class="card">
+      <h3 style="margin-bottom:1.5rem;">Projects by Status</h3>
+      <canvas id="statusChart" height="280"></canvas>
+    </div>
+    <!-- User roles -->
+    <div class="card">
+      <h3 style="margin-bottom:1.5rem;">Users by Role</h3>
+      <canvas id="roleChart" height="280"></canvas>
+    </div>
+  </div>
+
+  <div style="margin:2rem 0 1.5rem;"><h2>💸 Website Earnings</h2></div>
+  <div class="grid-2">
+    <!-- Earnings by month -->
+    <div class="card">
+      <h3 style="margin-bottom:1.5rem;">Monthly Earnings (INR)</h3>
+      <canvas id="earningMonthChart" height="280"></canvas>
+    </div>
+    <!-- Earnings by category -->
+    <div class="card">
+      <h3 style="margin-bottom:1.5rem;">Earnings by Category</h3>
+      <canvas id="earningCatChart" height="280"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const COLORS = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
+
+async function loadAnalytics() {
+  try {
+    const res = await fetch('/admin/stats');
+    const d = await res.json();
+
+    document.getElementById('s-users').textContent = d.totalUsers;
+    document.getElementById('s-projects').textContent = d.totalProjects;
+    document.getElementById('s-tx').textContent = d.totalTransactions;
+    document.getElementById('s-earnings').textContent = '₹' + (d.totalEarnings || 0).toLocaleString();
+
+    const opts = (title) => ({
+      responsive: true,
+      plugins: { legend: { position: 'bottom' }, title: { display: false } }
+    });
+
+    // Category chart
+    if (d.byCategory && d.byCategory.length > 0) {
+      new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: { labels: d.byCategory.map(x=>x._id||'Other'), datasets:[{ data: d.byCategory.map(x=>x.count), backgroundColor: COLORS }] },
+        options: opts()
+      });
+    }
+
+    // Status chart
+    if (d.byStatus && d.byStatus.length > 0) {
+      new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: { labels: d.byStatus.map(x=>x._id), datasets:[{ label:'Projects', data: d.byStatus.map(x=>x.count), backgroundColor: COLORS }] },
+        options: { ...opts(), scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 } } } }
+      });
+    }
+
+    // Role chart
+    if (d.byRole && d.byRole.length > 0) {
+      new Chart(document.getElementById('roleChart'), {
+        type: 'pie',
+        data: { labels: d.byRole.map(x=>x._id), datasets:[{ data: d.byRole.map(x=>x.count), backgroundColor: COLORS }] },
+        options: opts()
+      });
+    }
+
+    // Earning Month Chart
+    if (d.earningsByMonth && d.earningsByMonth.length > 0) {
+      new Chart(document.getElementById('earningMonthChart'), {
+        type: 'bar',
+        data: { labels: d.earningsByMonth.map(x=>x._id), datasets:[{ label:'Earnings (₹)', data: d.earningsByMonth.map(x=>x.earnings), backgroundColor: '#10b981' }] },
+        options: { ...opts(), scales:{ y:{ beginAtZero:true } } }
+      });
+    }
+
+    // Earning Category Chart
+    if (d.earningsByCategory && d.earningsByCategory.length > 0) {
+      new Chart(document.getElementById('earningCatChart'), {
+        type: 'pie',
+        data: { labels: d.earningsByCategory.map(x=>x._id), datasets:[{ data: d.earningsByCategory.map(x=>x.earnings), backgroundColor: COLORS }] },
+        options: opts()
+      });
+    }
+  } catch(e) {
+    console.error('Analytics load error:', e);
+  }
+}
+loadAnalytics();
+</script>
+<%- include('../layout/footer') %>

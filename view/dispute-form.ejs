@@ -1,0 +1,63 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page" style="max-width:680px;">
+  <div class="page-header">
+    <h1>⚖️ Raise a Dispute</h1>
+    <p class="page-subtitle">Disputes are reviewed by our admin team within 48 hours.</p>
+  </div>
+  <%- include('layout/flash') %>
+
+  <div class="card" style="margin-bottom:1rem;background:var(--warning-bg,#fffbeb);border:1px solid #fcd34d;">
+    <p style="margin:0;font-size:.9rem;color:#92400e;">
+      ⚠️ <strong>Before raising a dispute</strong>, please try to resolve the issue directly with the other party via messages. Disputes should be a last resort.
+    </p>
+  </div>
+
+  <div class="card">
+    <div style="margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border,#e5e7eb);">
+      <div style="font-size:.8rem;color:var(--dark4,#6b7280);margin-bottom:.25rem;">Project</div>
+      <div style="font-weight:700;font-size:1.05rem;"><%= project.title %></div>
+      <div style="font-size:.85rem;color:var(--dark4);margin-top:.2rem;">
+        Client: <strong><%= project.clientName %></strong>
+        <% if (project.freelancerName) { %> · Freelancer: <strong><%= project.freelancerName %></strong><% } %>
+      </div>
+    </div>
+
+    <form method="POST" action="/projects/<%= project._id %>/dispute">
+      <div class="form-group">
+        <label class="form-label">Reason for Dispute *</label>
+        <select name="reason" class="form-control" required>
+          <option value="">Select a reason</option>
+          <option value="work-not-delivered">Work not delivered</option>
+          <option value="poor-quality">Poor quality of work</option>
+          <option value="payment-not-released">Payment not released</option>
+          <option value="scope-disagreement">Scope disagreement</option>
+          <option value="communication-issues">Communication issues</option>
+          <option value="deadline-missed">Deadline missed</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea name="description" class="form-control" rows="6"
+          placeholder="Please describe the issue in detail. Include relevant dates, agreements, and any attempts to resolve the issue."
+          required maxlength="2000"></textarea>
+        <div class="form-hint">Maximum 2000 characters</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Evidence (optional)</label>
+        <textarea name="evidence" class="form-control" rows="3"
+          placeholder="Paste links to screenshots, documents, or other evidence (one per line)"></textarea>
+        <div class="form-hint">One URL or reference per line</div>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-top:1rem;">
+        <button type="submit" class="btn btn-danger">⚖️ Submit Dispute</button>
+        <a href="/projects/<%= project._id %>" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('layout/footer') %>

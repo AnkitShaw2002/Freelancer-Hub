@@ -1,0 +1,19 @@
+<%- include('layout/header') %>
+<%- include('layout/navbar') %>
+<div class="page" style="max-width:700px;">
+  <div class="page-header"><h1>🔔 Notifications</h1></div>
+  <% if (!notifications || notifications.length === 0) { %>
+    <div class="empty-state card"><div class="icon">🔕</div><h3>No notifications yet</h3><p>Activity will appear here</p></div>
+  <% } else { %>
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      <% notifications.forEach(n => { %>
+        <a href="<%= n.link||'#' %>" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--white);border-radius:var(--radius-sm);border:1.5px solid var(--light);text-decoration:none;color:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--light)'">
+          <div style="font-size:1.4rem;"><% const icons={bid:'🎯',message:'💬',payment:'💰',project:'📋',review:'⭐',system:'🔔'}; %><%= icons[n.type]||'🔔' %></div>
+          <div style="flex:1;"><div style="font-weight:600;color:var(--dark);font-size:.9rem;"><%= n.message %></div><div class="text-muted" style="font-size:.75rem;"><%= new Date(n.createdAt).toLocaleString() %></div></div>
+          <% if (!n.isRead) { %><div style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;"></div><% } %>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('layout/footer') %>

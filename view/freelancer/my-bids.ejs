@@ -1,0 +1,43 @@
+<%- include('../layout/header') %>
+<%- include('../layout/navbar') %>
+<div class="page">
+  <%- include('../layout/flash') %>
+  <div class="page-header"><h1>My Proposals</h1><p class="page-subtitle"><%= projects.length %> proposal(s) submitted</p></div>
+  <% if (projects.length === 0) { %>
+    <div class="empty-state card"><div class="icon">🎯</div><h3>No bids yet</h3><p>Browse open projects and start bidding to find work</p><a href="/projects" class="btn btn-primary mt-2">Browse Projects</a></div>
+  <% } else { %>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <% projects.forEach(p => { const b = p.myBid; %>
+        <div class="card" style="border-left:4px solid <%= b.status==='accepted'?'var(--success)':b.status==='rejected'?'var(--danger)':'var(--primary)' %>;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <h3><a href="/projects/<%= p._id %>"><%= p.title %></a></h3>
+              <div style="display:flex;gap:.5rem;margin-top:.4rem;flex-wrap:wrap;">
+                <span class="badge badge-<%= p.status %>">project: <%= p.status %></span>
+                <span class="badge badge-<%= b.status %>">bid: <%= b.status %></span>
+                <span class="badge badge-primary"><%= p.category %></span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;font-size:1.2rem;">₹<%= b.amount.toLocaleString() %></div>
+              <div class="text-muted" style="font-size:.8rem;">⏱ <%= b.deliveryDays %> days · submitted <%= new Date(b.createdAt).toLocaleDateString() %></div>
+            </div>
+          </div>
+          <p style="font-size:.88rem;color:var(--mid);margin-top:.75rem;background:var(--lighter);padding:.75rem;border-radius:var(--radius-sm);">
+            "<%= b.proposal.substring(0, 200) %><%= b.proposal.length>200?'...':'' %>"
+          </p>
+          <div style="display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap;">
+            <a href="/projects/<%= p._id %>" class="btn btn-ghost btn-sm">View Project</a>
+            <a href="/messages/<%= p.clientId %>" class="btn btn-ghost btn-sm">💬 Message Client</a>
+            <% if (b.status === 'pending' && p.status === 'open') { %>
+              <form method="POST" action="/projects/<%= p._id %>/bid/<%= b._id %>/withdraw">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Withdraw bid?')">Withdraw</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../layout/footer') %>
