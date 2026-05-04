@@ -116,9 +116,10 @@ class PaymentApiController {
             }
 
             const stripe = getStripe();
+            const simulatePayment = process.env.NODE_ENV === 'test' || process.env.PAYMENT_MODE === 'demo' || !stripe;
 
-            // Handle Simulated Payment if Stripe is not configured
-            if (!stripe) {
+            // Handle Simulated Payment if Stripe is not configured or demo mode is enabled
+            if (simulatePayment) {
                 project.isPaid = true;
                 project.amountPaid = selectedBid.amount;
                 project.status = 'in-progress';

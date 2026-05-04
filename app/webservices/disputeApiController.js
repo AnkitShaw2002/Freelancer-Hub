@@ -63,7 +63,7 @@ class DisputeApiController {
      */
     async postDispute(req, res) {
         try {
-            const { projectId } = req.params;
+            const projectId = req.params.projectId || req.params.id;
             const project = await Project.findById(projectId);
 
             if (!project) {
@@ -112,7 +112,7 @@ class DisputeApiController {
                 reason,
                 description,
                 evidence: evidenceArr,
-                status: 'pending'
+                status: 'open'
             });
 
             await dispute.save();

@@ -35,6 +35,24 @@ describe('Profile API', () => {
     expect(res.body.data.isOwn).toBeFalsy();
   });
 
+  it('should return the authenticated user profile', async () => {
+    const user = await createUser({
+      email: 'self.profile@example.com',
+      role: 'freelancer',
+      firstName: 'Self',
+      lastName: 'Profile'
+    });
+
+    const res = await request(app)
+      .get('/api/profile')
+      .set('Cookie', [getAuthCookie(user)]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.profile.email).toBe('self.profile@example.com');
+    expect(res.body.data.isOwn).toBe(true);
+  });
+
   it('should allow authenticated user to read edit profile data', async () => {
     const freelancer = await createUser({ email: 'edit.freelancer@example.com', role: 'freelancer', firstName: 'Edit', lastName: 'Freelancer' });
     const res = await request(app)

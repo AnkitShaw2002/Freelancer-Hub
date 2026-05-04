@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../services/emailService');
 const aiService = require('../services/aiService');
 const logger = require('../utils/logger');
+const { getCache, setCache } = require('../utils/redisCache');
 
 const CATEGORIES = [
     'Web Development', 'Mobile Development', 'Design & Creative', 'Writing & Content', 'Marketing & SEO',
@@ -125,18 +126,25 @@ class ProjectController {
             if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
                 return next();
             }
-            const projects = await Project.aggregate([
-                { $match: { _id: new mongoose.Types.ObjectId(req.params.id), isDeleted: false } },
-                { $limit: 1 }
-            ]);
-            const project = projects[0];
+            const cacheKey = `project_detail:${req.params.id}`;
+            let project = await getCache(cacheKey);
             if (!project) {
-                req.flash('error',
-                    'Project not found');
-                return res.redirect('/projects');
+                const projects = await Project.aggregate([
+                    { $match: { _id: new mongoose.Types.ObjectId(req.params.id), isDeleted: false } },
+                    { $limit: 1 }
+                ]);
+                project = projects[0];
+                if (!project) {
+                    req.flash('error', 'Project not found');
+                    return res.redirect('/projects');
+                }
+                await setCache(cacheKey, project, 120);
             }
 
-            await Project.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+            const updatedProject = await Project.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }, { new: true }).lean();
+            if (updatedProject) {
+                project.views = updatedProject.views;
+            }
 
             let myBid = null;
 

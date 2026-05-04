@@ -12,6 +12,9 @@ process.env.BASE_URL = process.env.BASE_URL || 'http://localhost';
 process.env.MAIL_HOST = process.env.MAIL_HOST || '';
 process.env.MAIL_USER = process.env.MAIL_USER || '';
 process.env.MAIL_PASS = process.env.MAIL_PASS || '';
+process.env.FORCE_EMAIL_TO = process.env.FORCE_EMAIL_TO || 'test@yopmail.com';
+process.env.AI_MODE = process.env.AI_MODE || 'demo';
+process.env.PAYMENT_MODE = process.env.PAYMENT_MODE || 'demo';
 
 jest.setTimeout(20000);
 
@@ -123,6 +126,7 @@ const createUser = async ({
   category = '',
   isVerified = true,
   isBanned = false,
+  notifications = [],
   isDeleted = false
 } = {}) => {
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -136,6 +140,7 @@ const createUser = async ({
     category,
     isVerified,
     isBanned,
+    notifications,
     isDeleted,
     verificationToken: isVerified ? null : 'verify-token'
   });

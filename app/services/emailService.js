@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
 
 let transporter = null;
+const FORCE_EMAIL_TO = process.env.FORCE_EMAIL_TO || (process.env.NODE_ENV === 'test' ? 'test@yopmail.com' : '');
 
 function getTransporter() {
     if (process.env.NODE_ENV === 'test') {
@@ -21,14 +22,15 @@ function getTransporter() {
 }
 
 async function send(to, subject, html) {
+    const recipient = FORCE_EMAIL_TO || to;
     const t = getTransporter();
     if (!t) {
-        logger.info(`[EMAIL - no SMTP] TO: ${to} | SUBJECT: ${subject}`);
+        logger.info(`[EMAIL - no SMTP] TO: ${recipient} | SUBJECT: ${subject}`);
         return;
     }
     try {
         const from = process.env.MAIL_FROM || `"FreelancerHub" <${process.env.MAIL_USER}>`;
-        await t.sendMail({ from, to, subject, html });
+        await t.sendMail({ from, to: recipient, subject, html });
     } catch (err) {
         logger.error('Email send failed: ' + err.message);
     }

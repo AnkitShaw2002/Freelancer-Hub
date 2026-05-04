@@ -77,7 +77,8 @@ class PaymentController {
             if (!selectedBid) return res.status(400).json({ error: 'No accepted bid' });
 
             const stripe = getStripe();
-            if (!stripe) {
+            const simulatePayment = process.env.NODE_ENV === 'test' || process.env.PAYMENT_MODE === 'demo' || !stripe;
+            if (simulatePayment) {
                 project.isPaid = true;
                 project.amountPaid = selectedBid.amount;
                 project.status = 'in-progress';

@@ -4,6 +4,7 @@ const Review = require('../models/Review');
 const Project = require('../models/Project');
 const { uploadToCloudinary } = require('../middleware/Uploadchecker');
 const logger = require('../utils/logger');
+const { getCache, setCache, delCache } = require('../utils/redisCache');
 
 class ProfileApiController {
     /**
@@ -22,6 +23,18 @@ class ProfileApiController {
             }
 
             const userId = new mongoose.Types.ObjectId(id);
+            const cacheKey = `user_profile:${id}`;
+            const cachedProfile = await getCache(cacheKey);
+            if (cachedProfile) {
+                const isOwn = req.user && (req.user._id || req.user.id).toString() === id.toString();
+                return res.status(200).json({
+                    success: true,
+                    data: {
+                        ...cachedProfile,
+                        isOwn
+                    }
+                });
+            }
 
             const profiles = await User.aggregate([
                 { $match: { _id: userId, isDeleted: false } },
@@ -51,13 +64,18 @@ class ProfileApiController {
             ]);
 
             const isOwn = req.user && (req.user._id || req.user.id).toString() === id.toString();
+            const responseData = {
+                profile: profileUser,
+                reviews,
+                activeProjects
+            };
+
+            await setCache(cacheKey, responseData, 120);
 
             return res.status(200).json({
                 success: true,
                 data: {
-                    profile: profileUser,
-                    reviews,
-                    activeProjects,
+                    ...responseData,
                     isOwn
                 }
             });
@@ -132,11 +150,14 @@ class ProfileApiController {
                 }
             }
 
+            const userId = req.user._id || req.user.id;
             const updatedUser = await User.findByIdAndUpdate(
-                req.user._id || req.user.id, 
+                userId,
                 { $set: updates },
                 { new: true }
             ).select('-password').lean();
+
+            await delCache(`user_profile:${userId}`);
 
             return res.status(200).json({
                 success: true,

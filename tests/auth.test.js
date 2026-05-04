@@ -1,4 +1,4 @@
-const { startTestDatabase, clearDatabase, stopTestDatabase, createUser } = require('./testUtils');
+const { startTestDatabase, clearDatabase, stopTestDatabase, createUser, getAuthCookie } = require('./testUtils');
 const request = require('supertest');
 const app = require('../app');
 const User = require('../app/models/User');
@@ -34,6 +34,12 @@ describe('Auth API', () => {
     const user = await User.findOne({ email: 'auth.user@example.com' }).lean();
     expect(user).toBeTruthy();
     expect(user.role).toBe('client');
+  });
+
+  it('should redirect register-create to register page', async () => {
+    const res = await request(app).get('/api/auth/register-create');
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.location).toBe('/register');
   });
 
   it('should verify a registered account using token', async () => {
@@ -108,6 +114,24 @@ describe('Auth API', () => {
 
     const updated = await User.findById(user._id).lean();
     expect(updated.resetPasswordToken).toBeNull();
+  });
+
+  it('should logout an authenticated user', async () => {
+    const user = await createUser({
+      email: 'logout.user@example.com',
+      role: 'client',
+      isVerified: true,
+      firstName: 'Logout',
+      lastName: 'User'
+    });
+
+    const res = await request(app)
+      .get('/api/auth/logout')
+      .set('Cookie', [getAuthCookie(user)]);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toMatch(/logged out/i);
   });
 });
 

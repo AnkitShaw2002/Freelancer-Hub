@@ -3,7 +3,11 @@ const logger = require('../utils/logger');
 
 let redisClient = null;
 
-if (process.env.NODE_ENV !== 'test') {
+const allowRedisInTest = process.env.REDIS_TEST_ENABLED === 'true';
+if (process.env.NODE_ENV !== 'test' || allowRedisInTest) {
+    if (process.env.NODE_ENV === 'test') {
+        logger.info('Redis test mode enabled via REDIS_TEST_ENABLED');
+    }
     redisClient = redis.createClient({
         url: process.env.REDIS_URL || 'redis://localhost:6379'
     });
