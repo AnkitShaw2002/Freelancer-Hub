@@ -94,7 +94,8 @@ describe('Client API', () => {
     console.log('EDIT RES', JSON.stringify(res.body));
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.title).toBe('Editable Project');
+    expect(res.body.data.project.title).toBe('Editable Project');
+    expect(Array.isArray(res.body.data.categories)).toBe(true);
   });
 
   it('should award a bid on a client project', async () => {

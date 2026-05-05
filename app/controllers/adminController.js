@@ -7,17 +7,17 @@ const logger = require('../utils/logger');
 class AdminController {
     async getDashboard(req, res) {
         try {
-            // 1. User Metrics
+            // 1. User 
             const totalUsers = await User.countDocuments({ isDeleted: false });
             const totalFreelancers = await User.countDocuments({ role: 'freelancer', isDeleted: false });
             const totalClients = await User.countDocuments({ role: 'client', isDeleted: false });
 
-            // 2. Project Metrics
+            // 2. Project 
             const totalProjects = await Project.countDocuments({ isDeleted: false });
             const openProjects = await Project.countDocuments({ status: 'open', isDeleted: false });
             const completedProjects = await Project.countDocuments({ status: 'completed', isDeleted: false });
 
-            // 3. Financial Metrics
+            // 3. Financial 
             const totalTx = await Transaction.countDocuments({ isDeleted: false });
             const earningsData = await Transaction.aggregate([
                 { $match: { status: 'completed' } },
@@ -25,7 +25,7 @@ class AdminController {
             ]);
             const totalEarnings = earningsData.length > 0 ? earningsData[0].total : 0;
 
-            // 4. Recent Activity Lists (No-Populate Strategy)
+            // 4. Recent Activity Lists
             const recentUsers = await User.find({ isDeleted: false })
                 .sort({ createdAt: -1 })
                 .limit(5)
@@ -99,8 +99,7 @@ class AdminController {
             const user = await User.findById(req.params.id);
 
             if (!user) {
-                req.flash('error',
-                    'User not found');
+                req.flash('error','User not found');
                 return res.redirect('/admin/users');
             }
             if (user.role === 'admin') {
@@ -150,15 +149,6 @@ class AdminController {
 
     async getProjects(req, res) {
         try {
-            // const { status, page = 1 } = req.query;
-            // const filter = { isDeleted: false };
-            // if (status) filter.status = status;
-            // const limit = 20, skip = (Number(page) - 1) * limit;
-            // const [projects, total] = await Promise.all(
-            //     [Project.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-            //     Project.countDocuments(filter)]
-            // );
-
             const status = req.query.status;
             const page = Number(req.query.page) || 1;
             const limit = 20;
@@ -170,7 +160,7 @@ class AdminController {
                 filter.status = status;
             }
 
-            // 3. Fetch Data Sequentially (Your Style)
+            // 3. Fetch Data Sequentially
             // First: Get the total count for pagination
             const total = await Project.countDocuments(filter);
 
@@ -188,9 +178,7 @@ class AdminController {
                 title: 'Manage Projects',
                 projects,
                 total,
-                // totalPages: Math.ceil(total / limit),
                 totalPages,
-                // currentPage: Number(page),
                 currentPage: page,
                 query: req.query
             });
@@ -205,10 +193,11 @@ class AdminController {
         try {
             await Project.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
-            req.flash('success', 'Project deleted'); res.redirect('/admin/projects');
+            req.flash('success', 'Project deleted'); 
+            res.redirect('/admin/projects');
 
         } catch (err) {
-            req.flash('error', 'Failed');
+            req.flash('error', 'Project deletion failed');
             res.redirect('/admin/projects');
         }
     }
@@ -236,32 +225,6 @@ class AdminController {
 
     async getStats(req, res) {
         try {
-            // const [totalUsers, totalProjects, totalTransactions] = await Promise.all([User.countDocuments(), Project.countDocuments(), Transaction.countDocuments()]);
-            // const [byCategory, byStatus, byRole] = await Promise.all([
-            //     Project.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
-            //     Project.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-            //     User.aggregate([{ $group: { _id: '$role', count: { $sum: 1 } } }])
-            // ]);
-            // const bidResult = await Project.aggregate([{ $group: { _id: null, total: { $sum: '$totalBids' } } }]);
-
-            // // Earnings stats
-            // const [earningsResult, earningsByMonth, earningsByCategory] = await Promise.all([
-            //     Transaction.aggregate([{ $match: { status: 'completed' } }, { $group: { _id: null, total: { $sum: '$platformFee' } } }]),
-            //     Transaction.aggregate([
-            //         { $match: { status: 'completed' } },
-            //         { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, earnings: { $sum: "$platformFee" } } },
-            //         { $sort: { "_id": 1 } }
-            //     ]),
-            //     Transaction.aggregate([
-            //         { $match: { status: 'completed' } },
-            //         { $lookup: { from: 'projects', localField: 'projectId', foreignField: '_id', as: 'proj' } },
-            //         { $unwind: '$proj' },
-            //         { $group: { _id: '$proj.category', earnings: { $sum: '$platformFee' } } },
-            //         { $sort: { earnings: -1 } }
-            //     ])
-            // ]);
-
-
             // 1. Basic Counts (Direct & Simple)
             const totalUsers = await User.countDocuments({ isDeleted: false });
             const totalProjects = await Project.countDocuments({ isDeleted: false });
@@ -349,17 +312,6 @@ class AdminController {
 
     async getDisputes(req, res) {
         try {
-            // const { status, page = 1 } = req.query;
-            // const filter = status ? { status } : {};
-            // const limit = 15, skip = (Number(page) - 1) * limit;
-            // const [disputes, total, openC, reviewC, resolvedC] = await Promise.all([
-            //     Dispute.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-            //     Dispute.countDocuments(filter), Dispute.countDocuments({ status: 'open' }),
-            //     Dispute.countDocuments({ status: 'under-review' }), Dispute.countDocuments({ status: 'resolved' })
-            // ]);
-
-
-
             // 1. Get Query Parameters
             const status = req.query.status;
             const page = Number(req.query.page) || 1;
@@ -372,22 +324,22 @@ class AdminController {
                 filter.status = status;
             }
 
-            // 3. Fetch Individual Counts (Sequential - Your Style)
+            // 3. Fetch Individual Counts 
             const openC = await Dispute.countDocuments({ status: 'open' });
             const reviewC = await Dispute.countDocuments({ status: 'under-review' });
             const resolvedC = await Dispute.countDocuments({ status: 'resolved' });
 
-            // Get total count for the filtered results (for pagination)
+            // Get total count for the filtered results 
             const total = await Dispute.countDocuments(filter);
 
-            // 4. Fetch the Dispute List (No-Populate Strategy)
+            // 4. Fetch the Dispute List 
             const disputes = await Dispute.find(filter)
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
                 .lean();
 
-            // 5. Reconstruct the counts object to support the current frontend
+            // 5. counts object for frontend
             const counts = {
                 all: openC + reviewC + resolvedC,
                 open: openC,
@@ -402,26 +354,13 @@ class AdminController {
 
             res.render('admin/disputes',
                 {
-                    // title: 'Manage Disputes',
-                    // disputes,
-                    // total,
-                    // totalPages: Math.ceil(total / limit),
-                    // currentPage: Number(page),
-                    // query: req.query,
-                    // counts: {
-                    //     all: openC + reviewC + resolvedC,
-                    //     open: openC,
-                    //     'under-review': reviewC,
-                    //     resolved: resolvedC
-                    // }
-
                     title: 'Manage Disputes',
                     disputes,
                     total, // total count for the filtered view
                     totalPages,
                     currentPage: page,
                     query: req.query,
-                    counts, // This matches your frontend usage (counts.open, counts.all, etc.)
+                    counts,
                 });
         } catch (err) {
             logger.error('getDisputes logic Error: ' + err.message);
@@ -451,6 +390,7 @@ class AdminController {
                 await Project.findByIdAndUpdate(dispute.projectId, { status: 'in-progress' });
 
                 const notifyIds = [dispute.initiatorId, dispute.respondentId].filter(Boolean);
+
                 for (const uid of notifyIds) {
                     await User.findByIdAndUpdate(uid,
                         {
@@ -472,12 +412,20 @@ class AdminController {
 
         } catch (err) {
             logger.error('resolveDispute: ' + err.message);
-            req.flash('error', 'Failed to resolve dispute'); res.redirect('/admin/disputes');
+            req.flash('error', 'Failed to resolve dispute'); 
+            res.redirect('/admin/disputes');
         }
     }
 
     getAnalytics(req, res) {
-        res.render('admin/analytics', { title: 'Analytics' });
+        try {
+            res.render('admin/analytics', { title: 'Analytics' });
+        } catch (error) {
+            logger.error('resolveDispute: ' + err.message);
+            req.flash('error', 'Failed to load Analytics page'); 
+            res.redirect('/admin');
+        }
+        
     }
 }
 

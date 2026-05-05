@@ -1,0 +1,61 @@
+<%- include('../layout/header') %>
+
+<!-- Brand Pin -->
+<div class="brand-container">
+    <a href="/" class="brand-link">
+        <i class="bi bi-hexagon-fill text-primary fs-3"></i>
+        <span class="fw-bold fs-4" style="color: var(--text-main);">FreelancerHub</span>
+    </a>
+</div>
+
+<main class="d-flex align-items-center justify-content-center text-center p-4" style="min-height: 100vh; background: var(--bg-main); overflow: hidden;">
+    
+    <!-- Background Watermark Error Code -->
+    <div class="position-absolute translate-middle start-50 top-50 fw-bold" 
+         style="font-size: 25vw; opacity: 0.03; z-index: 0; user-select: none;">
+        <%= errorCode %>
+    </div>
+
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <!-- Status Icon Logic -->
+                <div class="mb-4">
+                    <% if (errorCode >= 500) { %>
+                        <i class="bi bi-gear-wide-connected text-danger display-2 animate-spin"></i>
+                    <% } else if (errorCode === 403) { %>
+                        <i class="bi bi-shield-lock text-warning display-2 shadow-glow"></i>
+                    <% } else { %>
+                        <i class="bi bi-search text-primary display-2"></i>
+                    <% } %>
+                </div>
+
+                <div class="badge bg-primary-soft text-primary px-3 py-2 rounded-pill mb-3">
+                    Error Code: <%= errorCode %>
+                </div>
+                
+                <h1 class="display-4 fw-bold mb-3"><%= title %></h1>
+                <p class="lead text-muted mb-5">
+                    <%= message %>
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                    <a href="/" class="btn btn-primary px-5 py-3 fw-bold rounded-3 shadow-sm">
+                        Return Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary px-5 py-3 fw-bold rounded-3">
+                        Go Back
+                    </button>
+                </div>
+
+                <div class="mt-5">
+                    <p class="small text-muted">Need help? <a href="/support" class="text-primary text-decoration-none fw-bold">Report this issue</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../layout/footer') %>

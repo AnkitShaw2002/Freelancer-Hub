@@ -87,8 +87,8 @@ class ProfileController {
 
                 } catch (cloudErr) {
                     logger.error('Cloudinary upload error: ' + cloudErr.message);
-
                     req.flash('error', 'Profile picture upload failed. Other changes were saved.');
+                    return res.redirect('/profile/edit');
                 }
             }
 

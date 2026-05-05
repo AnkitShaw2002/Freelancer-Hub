@@ -82,9 +82,7 @@ class ReviewController {
             res.redirect(`/projects/${project._id}`);
 
         } catch (err) {
-
             logger.error('postReview: ' + err.message);
-
             req.flash('error', 'Failed to submit review');
              res.redirect('/dashboard');
         }

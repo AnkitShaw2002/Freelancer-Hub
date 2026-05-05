@@ -6,105 +6,10 @@ const Transaction = require('../models/Transaction');
 class dashboardController {
   async getDashboard(req, res) {
     try {
-      // const user = req.user;
-      // if (!user) return res.redirect('/login');
-
-      // let data = {};
-
-      // const userId = new mongoose.Types.ObjectId(user._id || user.id);
-
-      // if (user.role === 'client') {
-      //   const [myProjects, stats] = await Promise.all([
-      //     Project.aggregate([
-      //       { $match: { clientId: userId, isDeleted: false } },
-      //       { $sort: { createdAt: -1 } },
-      //       { $limit: 5 }
-      //     ]),
-      //     Project.aggregate([
-      //       { $match: { clientId: userId, isDeleted: false } },
-      //       {
-      //         $group: {
-      //           _id: null,
-      //           total: { $sum: 1 },
-      //           open: { $sum: { $cond: [{ $eq: ["$status", "open"] }, 1, 0] } },
-      //           completed: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } },
-      //           bids: { $sum: "$totalBids" }
-      //         }
-      //       }
-      //     ])
-      //   ]);
-      //   const s = stats[0] || { total: 0, open: 0, completed: 0, bids: 0 };
-      //   data = { 
-      //     myProjects, 
-      //     totalProjects: s.total, 
-      //     openProjects: s.open, 
-      //     completedProjects: s.completed, 
-      //     totalBidsReceived: s.bids 
-      //   };
-
-      // } else if (user.role === 'freelancer') {
-      //   const [appliedProjects, activeProjects, stats] = await Promise.all([
-      //     Project.aggregate([
-      //       { $match: { 'bids.freelancerId': userId, isDeleted: false } },
-      //       { $sort: { createdAt: -1 } },
-      //       { $limit: 5 }
-      //     ]),
-      //     Project.aggregate([
-      //       { $match: { freelancerId: userId, status: { $in: ['assigned', 'in-progress'] }, isDeleted: false } }
-      //     ]),
-      //     Project.aggregate([
-      //       { $match: { freelancerId: userId, status: 'completed', isDeleted: false } },
-      //       { $count: "count" }
-      //     ])
-      //   ]);
-      //   const bidCountResult = await Project.aggregate([
-      //       { $match: { 'bids.freelancerId': userId, isDeleted: false } },
-      //       { $count: "count" }
-      //   ]);
-      //   data = { 
-      //     appliedProjects, 
-      //     activeProjects, 
-      //     completedProjects: stats[0]?.count || 0, 
-      //     totalBids: bidCountResult[0]?.count || 0 
-      //   };
-
-      // } else if (user.role === 'admin') {
-      //   const [userStats, projectStats, recentUsers, recentProjects] = await Promise.all([
-      //     User.aggregate([{ $count: "total" }]),
-      //     Project.aggregate([
-      //       { $match: { isDeleted: false } },
-      //       {
-      //         $group: {
-      //           _id: null,
-      //           total: { $sum: 1 },
-      //           open: { $sum: { $cond: [{ $eq: ["$status", "open"] }, 1, 0] } },
-      //           completed: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } }
-      //         }
-      //       }
-      //     ]),
-      //     User.aggregate([{ $sort: { createdAt: -1 } }, { $limit: 5 }]),
-      //     Project.aggregate([{ $match: { isDeleted: false } }, { $sort: { createdAt: -1 } }, { $limit: 5 }])
-      //   ]);
-      //   const ps = projectStats[0] || { total: 0, open: 0, completed: 0 };
-
-      //   data = { 
-      //     totalUsers: userStats[0]?.total || 0, 
-      //     totalProjects: ps.total, 
-      //     openProjects: ps.open, 
-      //     completedProjects: ps.completed, 
-      //     recentUsers, 
-      //     recentProjects 
-      //   };
-      // }
-
-      // res.render('dashboard', { 
-      //   title: 'Dashboard',
-      //    ...data });
-
-
-
       const user = req.user;
-        if (!user) return res.redirect('/login');
+        if (!user) {
+            req.flash('error', 'login to continue');
+            return res.redirect('/login');}
 
         const userId = new mongoose.Types.ObjectId(user._id || user.id);
 

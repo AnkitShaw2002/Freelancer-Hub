@@ -29,7 +29,7 @@
               <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
                 <a href="/profile/<%= u._id %>" class="btn btn-ghost btn-sm">View</a>
                 <% if (u.role !== 'admin') { %>
-                  <form method="POST" action="/admin/users/<%= u._id %>/toggle-ban" style="display:inline;">
+                  <form method="POST" action="/admin/users/<%= u._id %>/ban" style="display:inline;">
                     <button type="submit" class="btn <%= u.isBanned?'btn-success':'btn-danger' %> btn-sm"><%= u.isBanned?'Unban':'Ban' %></button>
                   </form>
                 <% } %>

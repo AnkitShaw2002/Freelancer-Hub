@@ -78,7 +78,14 @@ const validate = (req, res, next) => {
         req.flash('error', firstError);
         
         // Robust redirect back with a fallback
-        const backURL = req.header('Referer') || '/dashboard';
+        let backURL = req.header('Referer');
+        if (!backURL) {
+            // Sensible fallbacks based on route
+            if (req.originalUrl.includes('register')) backURL = '/register';
+            else if (req.originalUrl.includes('login')) backURL = '/login';
+            else if (req.originalUrl.includes('forgot-password')) backURL = '/forgot-password';
+            else backURL = '/dashboard';
+        }
         return res.redirect(backURL);
     }
     next();

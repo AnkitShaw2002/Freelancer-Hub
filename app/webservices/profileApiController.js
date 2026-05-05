@@ -154,7 +154,7 @@ class ProfileApiController {
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
                 { $set: updates },
-                { new: true }
+                { returnDocument: 'after' }
             ).select('-password').lean();
 
             await delCache(`user_profile:${userId}`);

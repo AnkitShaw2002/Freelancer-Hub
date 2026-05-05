@@ -86,7 +86,6 @@
 
 
                                 <div class="mb-3">
-
                                     <label class="form-label">Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control border-end-0" id="password"
@@ -97,6 +96,9 @@
                                             <i class="bi bi-eye"></i>
                                         </span>
                                     </div>
+                                    <div class="form-text small">
+                                        Must be at least 8 chars with uppercase, lowercase, number, and special char.
+                                    </div>
                                 </div>
 
 
@@ -104,7 +106,7 @@
                                     <label class="form-label">Confirm Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control border-end-0" id="confirmPassword"
-                                            placeholder="Confirm your password" required>
+                                            name="confirmPassword" placeholder="Confirm your password" required>
                                         <span
                                             class="input-group-text bg-main border-start-0 cursor-pointer toggle-password"
                                             data-target="confirmPassword">
@@ -135,14 +137,14 @@
                                 <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-4">Create
                                     Account</button>
 
-                                <div class="text-center position-relative mb-4">
+                                <!-- <div class="text-center position-relative mb-4">
                                     <hr>
                                     <span
                                         class="position-absolute top-50 start-50 translate-middle bg-card px-3 text-muted small">or
                                         continue with</span>
-                                </div>
+                                </div> -->
 
-                                <div class="row g-3">
+                                <!-- <div class="row g-3">
                                     <div class="col-6">
                                         <button type="button" class="social-btn">
                                             <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png"
@@ -154,7 +156,7 @@
                                             <i class="bi bi-github"></i> GitHub
                                         </button>
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <p class="text-center mt-4 mb-0 small text-muted">
                                     Already have an account? <a href="/login"

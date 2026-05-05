@@ -3,7 +3,7 @@ const Project = require('../models/Project');
 const logger = require('../utils/logger');
 
 const CATEGORIES = ['Web Development', 'Mobile Development', 'Design & Creative', 'Writing & Content', 'Marketing & SEO',
-     'Data Science & AI', 'DevOps & Cloud', 'Video & Animation', 'Finance & Accounting', 'Legal', 'Other'];
+    'Data Science & AI', 'DevOps & Cloud', 'Video & Animation', 'Finance & Accounting', 'Legal', 'Other'];
 
 class PagesController {
     async landingPage(req, res) {
@@ -20,7 +20,11 @@ class PagesController {
 
         } catch (error) {
             logger.error('landingPage error: ' + error.message);
-            res.status(500).render('error', { message: 'Internal Server Error' });
+            req.flash('error', 'Fail to load landing page');
+            res.status(500).render('error', 
+                {
+                message: 'Internal Server Error'
+            });
         }
     }
 
@@ -127,6 +131,7 @@ class PagesController {
 
         } catch (error) {
             logger.error('getDashboard error: ' + error.message);
+            req.flash('error', 'Fail to load dashboard');
             res.status(500).render('error', { message: 'Internal Server Error' });
         }
     }
@@ -186,7 +191,6 @@ class PagesController {
             });
         } catch (e) {
             logger.error("getdetialsProject Error: " + e.message);
-
             req.flash('error', 'Could not retrieve project details.');
             res.redirect('/projects');
         }

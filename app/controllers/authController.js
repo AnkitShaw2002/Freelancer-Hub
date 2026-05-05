@@ -11,6 +11,7 @@ class AuthController {
 
     async postRegister(req, res) {
         try {
+            logger.info(`Registration attempt for email: ${req.body.email}`);
             const { firstName, lastName, email, password, role, category } = req.body;
 
             const existingUser = await User.findOne({ email, isDeleted: false }).lean();
@@ -26,6 +27,7 @@ class AuthController {
             }
 
             const displayName = `${firstName.trim()} ${lastName.trim()}`;
+
             const hashedPassword = await bcrypt.hash(password, 12);
             const verificationToken = crypto.randomBytes(32).toString('hex');
 
@@ -47,6 +49,8 @@ class AuthController {
                 await emailService.sendVerificationEmail(user, verifyLink);
             } catch (emailErr) {
                 logger.error('Verification email failed: ' + emailErr.message);
+                req.flash('error', 'Account created, but verification email failed to send. Please contact support.');
+                return res.redirect('/login');
             }
 
             logger.info(`New user registered: ${email}`);
@@ -55,7 +59,7 @@ class AuthController {
 
         } catch (error) {
             logger.error('Registration Error: ' + error.message);
-            
+
             req.flash('error', 'Registration failed. Please try again.');
             return res.redirect('/register');
         }
@@ -91,6 +95,7 @@ class AuthController {
             const { email, password } = req.body;
 
             const user = await User.findOne({ email: email.toLowerCase().trim(), isDeleted: false });
+
             if (!user) {
                 req.flash('error', 'No account found with this email address.');
                 return res.redirect('/login');
@@ -122,15 +127,21 @@ class AuthController {
 
                 // 2. Generate Tokens
                 const token = jwt.sign(
-                    { id: user._id, _id: user._id, name: user.displayName, email: user.email, role: user.role },
+                    {
+                        id: user._id,
+                        _id: user._id,
+                        name: user.displayName,
+                        email: user.email,
+                        role: user.role
+                    },
                     process.env.JWT_SECRET_KEY,
                     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
                 );
 
                 const refreshToken = jwt.sign(
                     { id: user._id },
-                     process.env.SESSION_SECRET,
-                      { expiresIn: '7d' });
+                    process.env.SESSION_SECRET,
+                    { expiresIn: '7d' });
 
                 // 3. Save Refresh Token
                 user.refreshToken = refreshToken;
@@ -138,18 +149,18 @@ class AuthController {
                 await user.save();
 
                 // 4. Set Cookies
-                res.cookie('token', token, { 
+                res.cookie('token', token, {
                     httpOnly: true, // Increased security
-                    secure: process.env.NODE_ENV === 'production', 
-                    sameSite: 'Lax', 
-                    maxAge: 7 * 24 * 60 * 60 * 1000 
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'Lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
                 });
-                
-                res.cookie('refreshToken', refreshToken, { 
-                    httpOnly: true, 
-                    secure: process.env.NODE_ENV === 'production', 
-                    sameSite: 'Strict', 
-                    maxAge: 7 * 24 * 60 * 60 * 1000 
+
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'Strict',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
                 });
 
                 // 5. Bind Session to User
@@ -172,9 +183,11 @@ class AuthController {
 
     async logout(req, res) {
         try {
+
             if (req.user && req.user._id) {
                 await User.findByIdAndUpdate(req.user._id, { refreshToken: null });
             }
+
             req.session.destroy((err) => {
                 if (err) logger.error('Session destroy error: ' + err.message);
                 res.clearCookie('connect.sid');
@@ -187,6 +200,7 @@ class AuthController {
             });
         } catch (error) {
             logger.error('Logout Error: ' + error.message);
+            req.flash('error', 'Logout failed. Please try again.');
             return res.redirect('/');
         }
     }

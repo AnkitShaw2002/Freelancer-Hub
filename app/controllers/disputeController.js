@@ -7,6 +7,7 @@ class DisputeController {
     async getDisputeForm(req, res) {
         try {
             const project = await Project.findById(req.params.id).lean();
+
             if (!project) {
                 req.flash('error', 'Project not found');
                 return res.redirect('/projects');
@@ -33,6 +34,7 @@ class DisputeController {
                     projectId: project._id,
                     status: { $ne: 'resolved' }
                 });
+
             if (existing) {
                 req.flash('error', 'A dispute is already open for this project');
                 return res.redirect(`/projects/${req.params.id}`);
@@ -128,7 +130,8 @@ class DisputeController {
 
         } catch (err) {
             logger.error('postDispute: ' + err.message);
-            req.flash('error', 'Failed to submit dispute'); res.redirect(`/projects/${req.params.id}`);
+            req.flash('error', 'Failed to submit dispute');
+            res.redirect(`/projects/${req.params.id}`);
         }
     }
 }

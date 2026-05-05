@@ -5,78 +5,57 @@ const logger = require('../utils/logger');
 class MessageController {
     async getInbox(req, res) {
         try {
-            // const userId = req.user._id || req.user.id;
-
-            // const [sent, received] = await Promise.all([
-            //     Message.find({ senderId: userId }).distinct('conversationId'),
-
-            //     Message.find({ receiverId: userId }).distinct('conversationId')
-            // ]);
-            // const allConvIds = [...new Set([...sent, ...received])];
-
-            // const conversations = await Promise.all(allConvIds.map(async convId => {
-            //     const last = await Message.findOne({ conversationId: convId }).sort({ createdAt: -1 }).lean();
-            //     const unread = await Message.countDocuments({ conversationId: convId, receiverId: userId, isRead: false });
-            //     const otherId = last.senderId.toString() === userId.toString() ? last.receiverId : last.senderId;
-            //     const otherName = last.senderId.toString() === userId.toString() ? last.receiverName : last.senderName;
-            //     return { convId, last, unread, otherId, otherName };
-            // }));
-
-            // conversations.sort((a, b) => new Date(b.last.createdAt) - new Date(a.last.createdAt));
-
-
-
             const userId = req.user._id || req.user.id;
 
-        // 1. Get unique conversation IDs (Sequential Style)
-        const sentIds = await Message.find({ senderId: userId }).distinct('conversationId');
-        const receivedIds = await Message.find({ receiverId: userId }).distinct('conversationId');
+            // 1. Get unique conversation IDs (Sequential Style)
+            const sentIds = await Message.find({ senderId: userId }).distinct('conversationId');
+            const receivedIds = await Message.find({ receiverId: userId }).distinct('conversationId');
 
-        // Combine and remove duplicates
-        const allConvIds = [...new Set([...sentIds, ...receivedIds])];
+            // Combine and remove duplicates
+            const allConvIds = [...new Set([...sentIds, ...receivedIds])];
 
-        const conversations = [];
+            const conversations = [];
 
-        // 2. Loop through each conversation ID to get details
-        // Your style uses clear, step-by-step logic inside the loop
-        for (const convId of allConvIds) {
-            // Get the very last message in this conversation
-            const lastMessage = await Message.findOne({ conversationId: convId })
-                .sort({ createdAt: -1 })
-                .lean();
+            // 2. Loop through each conversation ID to get details
+            // Your style uses clear, step-by-step logic inside the loop
+            for (const convId of allConvIds) {
+                // Get the very last message in this conversation
+                const lastMessage = await Message.findOne({ conversationId: convId })
+                    .sort({ createdAt: -1 })
+                    .lean();
 
-            if (!lastMessage) continue;
+                if (!lastMessage) continue;
 
-            // Get unread count for the current user
-            const unreadCount = await Message.countDocuments({ 
-                conversationId: convId, 
-                receiverId: userId, 
-                isRead: false 
-            });
+                // Get unread count for the current user
+                const unreadCount = await Message.countDocuments({
+                    conversationId: convId,
+                    receiverId: userId,
+                    isRead: false
+                });
 
-            // Identify the "Other Person"
-            // We use the denormalized names directly from our "No-Populate" model
-            let otherId, otherName;
+                // Identify the "Other Person"
+                // We use the denormalized names directly from our model
+                let otherId, otherName;
 
-            if (lastMessage.senderId.toString() === userId.toString()) {
-                otherId = lastMessage.receiverId;
-                otherName = lastMessage.receiverName;
-            } else {
-                otherId = lastMessage.senderId;
-                otherName = lastMessage.senderName;
+                if (lastMessage.senderId.toString() === userId.toString()) {
+                    otherId = lastMessage.receiverId;
+                    otherName = lastMessage.receiverName;
+                } else {
+                    otherId = lastMessage.senderId;
+                    otherName = lastMessage.senderName;
+                }
+
+                conversations.push({
+                    convId,
+                    last: lastMessage,
+                    unread: unreadCount,
+                    otherId,
+                    otherName
+                });
             }
 
-            conversations.push({
-                convId,
-                last: lastMessage,
-                unread: unreadCount,
-                otherId,
-                otherName
-            });
-        }
-
-        // 3. Sort conversations so the newest message is at the top
-        conversations.sort((a, b) => b.last.createdAt - a.last.createdAt);
+            // 3. Sort conversations so the newest message is at the top
+            conversations.sort((a, b) => b.last.createdAt - a.last.createdAt);
 
             res.render('inbox', {
                 title: 'Messages',
@@ -125,6 +104,7 @@ class MessageController {
                 });
 
         } catch (err) {
+            logger.error('getConversation: ' + err.message);
             req.flash('error', 'Failed to load conversation');
             res.redirect('/messages');
         }

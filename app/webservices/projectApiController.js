@@ -141,7 +141,7 @@ class ProjectController {
                 await setCache(cacheKey, project, 120);
             }
 
-            const updatedProject = await Project.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }, { new: true }).lean();
+            const updatedProject = await Project.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }, { returnDocument: 'after' }).lean();
             if (updatedProject) {
                 project.views = updatedProject.views;
             }
@@ -511,9 +511,16 @@ class ProjectController {
 
     async updateStatus(req, res) {
     try {
-        const { newStatus } = req.body;
+        const newStatus = req.body.newStatus || req.body.status;
         const { id } = req.params;
         const activeUser = req.user;
+
+        if (!newStatus) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing status field.'
+            });
+        }
 
         const project = await Project.findById(id);
 

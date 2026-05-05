@@ -35,6 +35,33 @@ async function generate(prompt) {
   }
 }
 
+function extractJson(text) {
+  if (!text) return null;
+  try {
+    // Try to find a JSON block between ```json and ```
+    const match = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/);
+    if (match) {
+      return JSON.parse(match[1].trim());
+    }
+    // Try to find the first { or [ and the last } or ]
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(text.substring(firstBrace, lastBrace + 1));
+    }
+    const firstBracket = text.indexOf('[');
+    const lastBracket = text.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+      return JSON.parse(text.substring(firstBracket, lastBracket + 1));
+    }
+    // Last resort: try to parse the whole thing
+    return JSON.parse(text.trim());
+  } catch (e) {
+    console.error('extractJson error:', e.message, 'Raw text:', text);
+    return null;
+  }
+}
+
 /**
  * Summarize a project description into 3 bullet points.
  * Returns { summary, bullets[] } or null on failure.
@@ -54,26 +81,20 @@ exports.summarizeProject = async (title, description) => {
   }
 
   const prompt = `You are a project analyst for a freelance marketplace. 
-Given this project, produce EXACTLY a JSON object (no markdown, no code fences) with these keys:
-- "summary": a single sentence (max 150 chars) summarizing the project
-- "bullets": an array of exactly 3 short strings (each max 80 chars), each a key deliverable
-- "difficulty": one of "beginner", "intermediate", or "expert"
-- "estimatedDays": an integer estimate of working days to complete this
+Analyze the following project and provide a summary.
+Respond ONLY with a JSON object in this format:
+{
+  "summary": "a single sentence summary (max 150 chars)",
+  "bullets": ["deliverable 1", "deliverable 2", "deliverable 3"],
+  "difficulty": "beginner" | "intermediate" | "expert",
+  "estimatedDays": integer
+}
 
 Project Title: ${title}
-Project Description: ${description}
-
-Respond with ONLY valid JSON. No markdown, no backticks.`;
+Project Description: ${description}`;
 
   const raw = await generate(prompt);
-  if (!raw) return null;
-  try {
-    const clean = raw.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (e) {
-    console.error('Gemini parse error:', e.message, raw);
-    return null;
-  }
+  return extractJson(raw);
 };
 
 /**
@@ -90,21 +111,14 @@ exports.extractSkills = async (description) => {
     return Array.from(new Set(words)).slice(0, 8);
   }
 
-  const prompt = `Extract the technical skills and technologies required for this project.
-Return ONLY a JSON array of skill strings (e.g. ["Node.js","React","MongoDB"]).
-Maximum 8 skills. No markdown, no explanation, no code fences.
+  const prompt = `Identify the top 8 technical skills or technologies required for this project.
+Return ONLY a JSON array of strings, e.g. ["React", "Node.js"].
 
 Project Description: ${description}`;
 
   const raw = await generate(prompt);
-  if (!raw) return [];
-  try {
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    return Array.isArray(parsed) ? parsed.slice(0, 8) : [];
-  } catch (e) {
-    return [];
-  }
+  const parsed = extractJson(raw);
+  return Array.isArray(parsed) ? parsed.slice(0, 8) : [];
 };
 
 /**
@@ -126,28 +140,15 @@ exports.analyseBids = async (projectTitle, projectDescription, bids) => {
     `Bid ${i + 1}: ${b.freelancerName} — ₹${b.amount} in ${b.deliveryDays} days, Rating: ${b.freelancerRating || 0}/5\nProposal: ${b.proposal.substring(0, 200)}`
   ).join('\n\n');
 
-  const prompt = `You are a hiring advisor for a freelance marketplace. 
-Analyse these bids for the project and recommend the best one.
+  const prompt = `Analyze these bids for the project and recommend the best one.
+Return ONLY a JSON object with: "recommendedName", "reason" (max 120 chars), and "riskLevel" ("low", "medium", "high").
 
 Project: ${projectTitle}
 Description: ${projectDescription.substring(0, 300)}
-
-Bids:
-${bidsText}
-
-Respond with ONLY a JSON object (no markdown) with keys:
-- "recommendedName": string (freelancer name)
-- "reason": string (max 120 chars explaining why)
-- "riskLevel": "low", "medium", or "high"`;
+Bids: ${bidsText}`;
 
   const raw = await generate(prompt);
-  if (!raw) return null;
-  try {
-    const clean = raw.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (e) {
-    return null;
-  }
+  return extractJson(raw);
 };
 
 /**

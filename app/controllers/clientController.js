@@ -5,23 +5,21 @@ const aiService = require('../services/aiService'); // Assuming your service is 
 const CATEGORIES = ['Web Development', 'Mobile Apps', 'Design', 'Writing', 'Data Science', 'Other'];
 
 
-class clientController{
+class clientController {
     // GET /client/projects/create
-
-
-// POST /client/projects — with AI summarization & skill extraction
- // Handle the form submission
+    // POST /client/projects — with AI summarization & skill extraction
+    // Handle the form submission
     async postCreateProject(req, res) {
         try {
-            const { 
-                title, 
-                description, 
-                category, 
-                skills, 
-                budget_type, 
-                budget_min, 
-                budget_max, 
-                deadline, 
+            const {
+                title,
+                description,
+                category,
+                skills,
+                budget_type,
+                budget_min,
+                budget_max,
+                deadline,
                 complexity // Changed from 'experience' to match complexity concept
             } = req.body;
 
@@ -38,10 +36,10 @@ class clientController{
             let milestonesArr = [];
             if (req.body.milestones) {
                 try {
-                    const raw = typeof req.body.milestones === 'string' 
-                        ? JSON.parse(req.body.milestones) 
+                    const raw = typeof req.body.milestones === 'string'
+                        ? JSON.parse(req.body.milestones)
                         : req.body.milestones;
-                        
+
                     if (Array.isArray(raw)) {
                         milestonesArr = raw
                             .filter(m => m.title && m.title.trim() && m.amount)
@@ -82,6 +80,7 @@ class clientController{
                 }
             } catch (aiErr) {
                 console.error('AI Service Error:', aiErr.message);
+                req.flash('error', 'AI Service Error');
                 // Fail silently for AI - the project creation is more important
             }
 
@@ -108,10 +107,10 @@ class clientController{
                     max: Number(budget_max)
                 },
                 deadline: deadline ? new Date(deadline) : null,
-                aiComplexity: aiComplexity, // Matches your schema
+                aiComplexity: aiComplexity, 
                 milestones: milestonesArr,
-                aiSummary: aiSummary, // Matches your schema
-                aiSkillsMatched: aiSkillsMatched, // Matches your schema
+                aiSummary: aiSummary, 
+                aiSkillsMatched: aiSkillsMatched, 
                 status: 'open',
                 views: 0
             });
@@ -130,4 +129,4 @@ class clientController{
 
 }
 
-module.exports=new clientController();
+module.exports = new clientController();

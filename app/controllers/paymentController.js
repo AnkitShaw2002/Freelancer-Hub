@@ -18,8 +18,7 @@ class PaymentController {
             const userId = (req.user._id || req.user.id).toString();
 
             if (!project) {
-                req.flash('error',
-                    'Project not found');
+                req.flash('error','Project not found');
                 return res.redirect('/client/projects');
             }
             if (project.clientId.toString() !== userId) {
@@ -33,8 +32,7 @@ class PaymentController {
             }
 
             if (project.isPaid) {
-                req.flash('error',
-                    'This project has already been paid');
+                req.flash('error','This project has already been paid');
                 return res.redirect(`/projects/${project._id}`);
             }
 
@@ -46,6 +44,9 @@ class PaymentController {
             }
 
             const stripeAvailable = !!process.env.STRIPE_SECRET_KEY;
+
+            req.flash('success','Checkout');
+
             res.render('client/checkout',
                 {
                     title: 'Secure Payment',
@@ -66,9 +67,16 @@ class PaymentController {
 
             const userId = (req.user._id || req.user.id).toString();
 
-            if (!project || project.clientId.toString() !== userId) return res.status(403).json({ error: 'Unauthorized' });
+            if (!project || project.clientId.toString() !== userId) {
+                req.flash('error', 'Unauthorized');
+                return res.redirect('/dashboard');
+                }
 
-            if (project.isPaid) return res.status(400).json({ error: 'Already paid' });
+            if (project.isPaid) { 
+                 req.flash('error', 'Already paid');
+                return res.redirect('/dashboard');
+                return res.status(400).json({ error: 'Already paid' });
+            }
 
             if (project.status !== 'assigned') return res.status(400).json({ error: 'Project not in assigned state' });
 

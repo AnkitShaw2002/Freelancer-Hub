@@ -141,4 +141,42 @@ app.use('/projects', require('./app/routers/webRoutes/projects'));
 app.get('/health', (req, res) => res.status(200).send('OK'));
 app.use(errorHandler);
 
+// 1. Handle 404 (Not Found)
+app.use((req, res, next) => {
+    res.status(404).render('errors/error404', {
+        title: '404 - Page Not Found',
+        // Pass user/messages if your layout depends on them
+        user: req.user || null 
+    });
+});
+
+// 2. Handle 500 (Internal Server Error)
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('errors/error500', {
+        title: '500 - Server Error',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+});
+
+app.use((err, req, res, next) => {
+    const statusCode = err.status || 500;
+    
+    // Map status codes to friendly titles
+    const errorTitles = {
+        400: 'Bad Request',
+        401: 'Unauthorized',
+        403: 'Access Denied',
+        404: 'Page Not Found',
+        500: 'Internal Server Error'
+    };
+
+    res.status(statusCode).render('errors/status', {
+        title: errorTitles[statusCode] || 'An Error Occurred',
+        errorCode: statusCode,
+        message: err.message || 'Something went wrong on our end.',
+        user: req.user || null
+    });
+});
+
 module.exports = app;

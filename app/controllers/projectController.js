@@ -112,10 +112,10 @@ class ProjectController {
                 { $match: { _id: new mongoose.Types.ObjectId(req.params.id), isDeleted: false } },
                 { $limit: 1 }
             ]);
+
             const project = projects[0];
             if (!project) {
-                req.flash('error',
-                    'Project not found');
+                req.flash('error','Project not found');
                 return res.redirect('/projects');
             }
 
@@ -163,10 +163,30 @@ class ProjectController {
             let skillsArr = skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : [];
             let aiSummary = '', aiSkillsMatched = [], aiComplexity = 'medium', aiEstimatedDays = null;
             try {
-                const aiResult = await Promise.race([aiService.summarizeProject(title, description), new Promise(r => setTimeout(() => r(null), 8000))]);
-                if (aiResult) { aiSummary = aiResult.summary || ''; aiSkillsMatched = aiResult.bullets || []; aiComplexity = aiResult.difficulty || 'medium'; aiEstimatedDays = aiResult.estimatedDays || null; }
-                if (skillsArr.length === 0) { const extracted = await Promise.race([aiService.extractSkills(description), new Promise(r => setTimeout(() => r([]), 6000))]); skillsArr = extracted; }
-            } catch (aiErr) { logger.error('AI error: ' + aiErr.message); }
+                // Summary and bullets (15s timeout)
+                const aiResult = await Promise.race([
+                    aiService.summarizeProject(title, description),
+                    new Promise(r => setTimeout(() => r(null), 15000))
+                ]);
+                
+                if (aiResult) {
+                    aiSummary = aiResult.summary || '';
+                    aiSkillsMatched = aiResult.bullets || [];
+                    aiComplexity = aiResult.difficulty || 'medium';
+                    aiEstimatedDays = aiResult.estimatedDays || null;
+                }
+
+                // Skill extraction if not provided (12s timeout)
+                if (skillsArr.length === 0) {
+                    const extracted = await Promise.race([
+                        aiService.extractSkills(description),
+                        new Promise(r => setTimeout(() => r([]), 12000))
+                    ]);
+                    skillsArr = extracted;
+                }
+            } catch (aiErr) {
+                logger.error('AI error: ' + aiErr.message);
+            }
 
             let milestones = [];
             if (milestonesRaw) {
@@ -177,7 +197,8 @@ class ProjectController {
                         amount: Number(m.amount),
                         dueDate: m.dueDate ? new Date(m.dueDate) : null
                     }));
-                } catch (e) { logger.error('Milestone parse error: ' + e.message); }
+                } catch (e) {
+                     logger.error('Milestone parse error: ' + e.message); }
             }
 
             const project = new Project({
@@ -593,6 +614,7 @@ class ProjectController {
             res.redirect('/freelancer/bids');
 
         } catch (err) {
+            logger.error('withdrawBid error: ' + err.message);
             req.flash('error', 'Failed to withdraw bid');
             res.redirect('/dashboard');
         }
@@ -623,16 +645,14 @@ class ProjectController {
             res.redirect('/client/projects');
 
         } catch (err) {
-
+            logger.error('deleteProject error: ' + err.message);
             req.flash('error', 'Failed to delete');
             res.redirect('/client/projects');
         }
     }
 
     async getEditProject(req, res) {
-
         try {
-
             const project = await Project.findById(req.params.id).lean();
 
             if (!project) {
@@ -659,15 +679,14 @@ class ProjectController {
             });
 
         } catch (err) {
+            logger.error('getEditProject error: ' + err.message);
             req.flash('error', 'Failed to load project');
             res.redirect('/client/projects');
         }
     }
 
     async postEditProject(req, res) {
-
         try {
-
             const project = await Project.findById(req.params.id);
 
             const userId = (req.user._id || req.user.id).toString();
@@ -767,6 +786,7 @@ class ProjectController {
             res.redirect(`/projects/${project._id}`);
 
         } catch (err) {
+            logger.error('submitMilestone eror: ' + err.message);
             req.flash('error', 'Failed to submit milestone');
             res.redirect(`/projects/${req.params.id}`);
         }
@@ -834,6 +854,7 @@ class ProjectController {
 
             res.redirect(`/projects/${project._id}`);
         } catch (err) {
+            logger.error('approveMilestone eror: ' + err.message);
             req.flash('error', 'Failed to approve milestone');
             res.redirect(`/projects/${req.params.id}`);
         }
@@ -878,6 +899,7 @@ class ProjectController {
             res.redirect(`/projects/${project._id}`);
 
         } catch (err) {
+            logger.error('rejectMilestone eror: ' + err.message);
             req.flash('error', 'Failed to reject milestone');
             res.redirect(`/projects/${req.params.id}`);
         }

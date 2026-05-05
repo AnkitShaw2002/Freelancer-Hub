@@ -356,10 +356,8 @@ class AdminApiController {
         const project = await Project.findByIdAndUpdate(
             id, 
             { isDeleted: true },
-            { new: true } // returns the updated document
+            { returnDocument: 'after' } // returns the updated document
         );
-
-        // 2. Handle Not Found
         if (!project) {
             return res.status(404).json({
                 success: false,
