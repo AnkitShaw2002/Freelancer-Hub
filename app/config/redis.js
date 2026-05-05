@@ -20,8 +20,8 @@ const sanitizeRedisUrl = (url) => {
         }
     }
     
-    // Ensure we use rediss:// if tls is implied or needed for cloud providers
-    if (process.env.NODE_ENV === 'production' && !cleanUrl.startsWith('rediss:') && cleanUrl.includes('upstash.io')) {
+    // Ensure we use rediss:// if needed for cloud providers like Upstash
+    if (!cleanUrl.startsWith('rediss:') && cleanUrl.includes('upstash.io')) {
         cleanUrl = cleanUrl.replace('redis:', 'rediss:');
     }
 
