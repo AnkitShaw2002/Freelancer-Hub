@@ -38,11 +38,7 @@ if (process.env.NODE_ENV !== 'test' || allowRedisInTest) {
     const isTls = redisUrl.startsWith('rediss:');
     
     redisClient = redis.createClient({
-        url: redisUrl,
-        socket: {
-            tls: isTls ? {} : undefined,
-            rejectUnauthorized: false 
-        }
+        url: redisUrl
     });
 
     redisClient.on('error', (err) => logger.error('Redis Client Error', err));
