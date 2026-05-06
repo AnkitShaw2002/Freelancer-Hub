@@ -129,7 +129,7 @@ class ProfileController {
 
             if (max_rate) filter.hourlyRate = { ...(filter.hourlyRate || {}), $lte: Number(max_rate) };
 
-            const limit = 12;
+            const limit = 5;
             const skip = (Number(page) - 1) * limit;
 
             const [freelancers, totalRes] = await Promise.all([
