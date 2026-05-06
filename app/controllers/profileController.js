@@ -111,7 +111,7 @@ class ProfileController {
         try {
             const { search, skills, experience, min_rate, max_rate, page = 1 } = req.query;
 
-            const filter = { role: 'freelancer', isDeleted: false, isBanned: false };
+            const filter = { role: 'freelancer',isVerified:true, isDeleted: false, isBanned: false };
 
             if (search) {
                 filter.$or = [
