@@ -560,3 +560,53 @@
 2026-05-06 04:24:26:2426 INFO: Redis Client Connected
 2026-05-06 04:24:27:2427 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
 2026-05-06 04:24:27:2427 INFO: Server running on port 3000 in development mode
+2026-05-06 10:18:43:1843 INFO: Cloudinary Configured
+2026-05-06 10:18:43:1843 INFO: Redis Client Connected
+2026-05-06 10:18:43:1843 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-06 10:18:43:1843 INFO: Server running on port 3000 in development mode
+2026-05-06 11:17:47:1747 INFO: Cloudinary Configured
+2026-05-06 11:17:47:1747 INFO: Redis Client Connected
+2026-05-06 11:17:48:1748 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-02.cpntxm6.mongodb.net
+2026-05-06 11:17:48:1748 INFO: Server running on port 3000 in development mode
+2026-05-06 11:30:07:307 INFO: User logged in: vikram@yopmail.com
+2026-05-06 11:32:14:3214 INFO: User logged in: arjun@yopmail.com
+2026-05-06 11:33:07:337 INFO: User logged in: vikram@yopmail.com
+2026-05-06 11:35:26:3526 INFO: User logged in: arjun@yopmail.com
+2026-05-06 11:36:25:3625 INFO: User logged in: vikram@yopmail.com
+2026-05-06 11:37:14:3714 INFO: User logged in: arjun@yopmail.com
+2026-05-06 11:37:47:3747 INFO: User logged in: arnab@yopmail.com
+2026-05-06 11:57:35:5735 INFO: New user registered via API: vasu@yopmail.com
+2026-05-06 11:57:44:5744 INFO: Email verified: vasu@yopmail.com
+2026-05-06 11:59:44:5944 INFO: User logged in via API: vasu@yopmail.com
+2026-05-06 12:21:43:2143 ERROR: apiPostCreateProject Error: Project validation failed: deadline: Cast to date failed for value "Invalid Date" (type Date) at path "deadline"
+2026-05-06 12:44:23:4423 INFO: New user registered via API: rajat@yopmail.com
+2026-05-06 12:44:39:4439 INFO: Email verified: rajat@yopmail.com
+2026-05-06 12:44:58:4458 INFO: User logged in via API: rajat@yopmail.com
+2026-05-06 13:13:13:1313 INFO: Cloudinary Configured
+2026-05-06 13:13:14:1314 INFO: Redis Client Connected
+2026-05-06 13:13:14:1314 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 13:13:14:1314 INFO: Server running on port 3000 in development mode
+2026-05-06 13:18:59:1859 INFO: User logged in via API: vasu@yopmail.com
+2026-05-06 16:00:58:058 INFO: Cloudinary Configured
+2026-05-06 16:00:58:058 INFO: Redis Client Connected
+2026-05-06 16:01:00:10 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 16:01:00:10 INFO: Server running on port 3000 in development mode
+2026-05-06 16:02:29:229 INFO: User logged in: vasu@yopmail.com
+2026-05-06 16:44:19:4419 INFO: Cloudinary Configured
+2026-05-06 16:44:19:4419 INFO: Redis Client Connected
+2026-05-06 16:44:19:4419 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-02.cpntxm6.mongodb.net
+2026-05-06 16:44:19:4419 INFO: Server running on port 3000 in development mode
+2026-05-06 16:52:55:5255 INFO: Cloudinary Configured
+2026-05-06 16:52:55:5255 INFO: Redis Client Connected
+2026-05-06 16:52:56:5256 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-06 16:52:56:5256 INFO: Server running on port 3000 in development mode
+2026-05-06 17:08:16:816 INFO: Cloudinary Configured
+2026-05-06 17:08:17:817 INFO: Redis Client Connected
+2026-05-06 17:08:18:818 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-02.cpntxm6.mongodb.net
+2026-05-06 17:08:18:818 INFO: Server running on port 3000 in development mode
+2026-05-06 17:13:34:1334 INFO: Cloudinary Configured
+2026-05-06 17:13:35:1335 INFO: Redis Client Connected
+2026-05-06 17:13:35:1335 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 17:13:35:1335 INFO: Server running on port 3000 in development mode
+2026-05-06 17:14:19:1419 INFO: User logged in: arjun@yopmail.com
+2026-05-06 17:23:32:2332 INFO: User logged in via API: arnab@yopmail.com

@@ -78,7 +78,7 @@ class ProjectController {
             },
             {
                 $project: {
-                    bids: 0,
+                    // bids: 0,//off it for testing api for bits to show
                     milestones: 0,
                     clientInfo: 0,
                     clientDetails: 0
