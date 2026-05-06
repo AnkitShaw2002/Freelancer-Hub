@@ -47,7 +47,7 @@ class ProjectController {
             };
 
             const sortBy = sortOptions[sort] || sortOptions.newest;
-            const limit = 8;
+            const limit = 6;
             const skip = (Number(page) - 1) * limit;
             const pipeline = [
                 { $match: filter },
