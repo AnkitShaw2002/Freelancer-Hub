@@ -16,7 +16,11 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
       <% freelancers.forEach(f => { %>
         <div class="freelancer-card">
-          <% if (f.avatar) { %><img src="<%= f.avatar %>" class="avatar"><% } else { %><div class="avatar-p"><%= f.name.charAt(0) %></div><% } %>
+          <% if (f.profilePicture && f.profilePicture.url) { %>
+            <img src="<%= f.profilePicture.url %>" class="avatar" alt="<%= f.name %>">
+          <% } else { %>
+            <div class="avatar-p"><%= (f.name || 'F').charAt(0).toUpperCase() %></div>
+          <% } %>
           <a href="/profile/<%= f._id %>" style="font-weight:800;font-size:1rem;color:var(--dark);display:block;margin-bottom:.25rem;"><%= f.name %></a>
           <% if (f.category) { %><div class="text-muted" style="font-size:.82rem;margin-bottom:.4rem;"><%= f.category %></div><% } %>
           <% if (f.avgRating > 0) { %><div style="color:#fbbf24;font-size:.85rem;margin-bottom:.5rem;">⭐ <%= f.avgRating.toFixed(1) %> (<%= f.totalReviews %> reviews)</div><% } %>

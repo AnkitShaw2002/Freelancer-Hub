@@ -610,3 +610,68 @@
 2026-05-06 17:13:35:1335 INFO: Server running on port 3000 in development mode
 2026-05-06 17:14:19:1419 INFO: User logged in: arjun@yopmail.com
 2026-05-06 17:23:32:2332 INFO: User logged in via API: arnab@yopmail.com
+2026-05-06 21:16:38:1638 INFO: Cloudinary Configured
+2026-05-06 21:16:39:1639 INFO: Redis Client Connected
+2026-05-06 21:16:39:1639 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 21:16:39:1639 INFO: Server running on port 3000 in development mode
+2026-05-06 21:17:19:1719 INFO: User logged in: arnab@yopmail.com
+2026-05-06 21:24:32:2432 INFO: User logged in: arjun@yopmail.com
+2026-05-06 21:33:47:3347 INFO: Registration attempt for email: marcus@yopmail.com
+2026-05-06 21:33:51:3351 INFO: New user registered: marcus@yopmail.com
+2026-05-06 21:34:00:340 INFO: Email verified: marcus@yopmail.com
+2026-05-06 21:34:07:347 INFO: User logged in: marcus@yopmail.com
+2026-05-06 21:41:28:4128 INFO: User logged in: samuel@yopmail.com
+2026-05-06 21:45:56:4556 INFO: User logged in: marcus@yopmail.com
+2026-05-06 21:52:46:5246 INFO: Cloudinary Configured
+2026-05-06 21:52:46:5246 INFO: Redis Client Connected
+2026-05-06 21:52:47:5247 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 21:52:47:5247 INFO: Server running on port 3000 in development mode
+2026-05-06 21:54:47:5447 INFO: User logged in: samuel@yopmail.com
+2026-05-06 21:57:05:575 INFO: User logged in: marcus@yopmail.com
+2026-05-06 21:59:32:5932 INFO: User logged in: samuel@yopmail.com
+2026-05-06 22:00:14:014 INFO: User logged in: marcus@yopmail.com
+2026-05-06 22:01:00:10 INFO: User logged in: arnab@yopmail.com
+2026-05-06 22:03:50:350 INFO: Registration attempt for email: kavita@yopmail.com
+2026-05-06 22:03:55:355 INFO: New user registered: kavita@yopmail.com
+2026-05-06 22:04:03:43 INFO: Email verified: kavita@yopmail.com
+2026-05-06 22:04:10:410 INFO: User logged in: kavita@yopmail.com
+2026-05-06 22:11:21:1121 INFO: User logged in: marcus@yopmail.com
+2026-05-06 22:15:50:1550 INFO: Cloudinary Configured
+2026-05-06 22:15:51:1551 INFO: Redis Client Connected
+2026-05-06 22:15:52:1552 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-06 22:15:52:1552 INFO: Server running on port 3000 in development mode
+2026-05-06 23:34:01:341 INFO: Cloudinary Configured
+2026-05-06 23:34:01:341 INFO: Redis Client Connected
+2026-05-06 23:34:02:342 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-06 23:34:02:342 INFO: Server running on port 3000 in development mode
+2026-05-06 23:37:41:3741 INFO: User logged in: arnab@yopmail.com
+2026-05-06 23:39:49:3949 INFO: Password reset requested: rajat@yopmail.com
+2026-05-06 23:40:15:4015 INFO: Password reset successful: rajat@yopmail.com
+2026-05-06 23:40:24:4024 INFO: User logged in: rajat@yopmail.com
+2026-05-06 23:41:06:416 INFO: Password reset requested: rajat@yopmail.com
+2026-05-06 23:41:19:4119 INFO: Password reset successful: rajat@yopmail.com
+2026-05-06 23:41:27:4127 INFO: User logged in: rajat@yopmail.com
+2026-05-06 23:42:07:427 INFO: User logged in: arnab@yopmail.com
+2026-05-06 23:43:15:4315 INFO: User logged in: vasu@yopmail.com
+2026-05-06 23:53:51:5351 INFO: Cloudinary Configured
+2026-05-06 23:53:51:5351 INFO: Redis Client Connected
+2026-05-06 23:53:52:5352 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-02.cpntxm6.mongodb.net
+2026-05-06 23:53:52:5352 INFO: Server running on port 3000 in development mode
+2026-05-06 23:59:03:593 INFO: Cloudinary Configured
+2026-05-06 23:59:03:593 INFO: Redis Client Connected
+2026-05-06 23:59:04:594 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-01.cpntxm6.mongodb.net
+2026-05-06 23:59:04:594 INFO: Server running on port 3000 in development mode
+2026-05-07 00:04:34:434 INFO: Cloudinary Configured
+2026-05-07 00:04:34:434 INFO: Redis Client Connected
+2026-05-07 00:04:34:434 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-07 00:04:34:434 INFO: Server running on port 3000 in development mode
+2026-05-07 00:10:02:102 INFO: Registration attempt for email: suman@yopmail.com
+2026-05-07 00:10:07:107 INFO: New user registered: suman@yopmail.com
+2026-05-07 00:10:17:1017 INFO: Email verified: suman@yopmail.com
+2026-05-07 00:13:43:1343 INFO: User logged in: suman@yopmail.com
+2026-05-07 00:23:34:2334 INFO: Cloudinary Configured
+2026-05-07 00:23:34:2334 INFO: Redis Client Connected
+2026-05-07 00:23:34:2334 INFO: MongoDB Connected: ac-tzo7kzl-shard-00-00.cpntxm6.mongodb.net
+2026-05-07 00:23:34:2334 INFO: Server running on port 3000 in development mode
+2026-05-07 00:32:30:3230 INFO: User logged in: vikram@yopmail.com
+2026-05-07 00:37:22:3722 INFO: User logged in: kavita@yopmail.com

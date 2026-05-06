@@ -23,13 +23,23 @@ function getModel() {
   }
 }
 
-async function generate(prompt) {
+async function generate(prompt, retryCount = 0) {
   const m = getModel();
   if (!m) return null;
   try {
     const result = await m.generateContent(prompt);
     return result.response.text();
   } catch (e) {
+    // Handle 503 (High Demand) or 429 (Rate Limit) with exponential backoff
+    const isRetryable = e.message.includes('503') || e.message.includes('429') || e.message.includes('Service Unavailable');
+    
+    if (isRetryable && retryCount < 3) {
+      const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+      console.warn(`Gemini API busy (Attempt ${retryCount + 1}). Retrying in ${delay}ms...`);
+      await new Promise(res => setTimeout(res, delay));
+      return generate(prompt, retryCount + 1);
+    }
+
     console.error('Gemini generate error:', e.message);
     return null;
   }

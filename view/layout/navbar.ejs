@@ -67,13 +67,13 @@
                                     <%= currentUser.role %>
                                 </small>
                             </div>
-                            <% if (currentUser.avatar || currentUser.profileImage) { %>
-                                <img src="<%= currentUser.avatar || currentUser.profileImage %>" alt="Profile"
+                            <% if (currentUser.profilePicture && currentUser.profilePicture.url && (currentUser.profilePicture.public_id || currentUser.profilePicture.url.includes('googleusercontent'))) { %>
+                                <img src="<%= currentUser.profilePicture.url %>" alt="Profile"
                                     class="rounded-circle border" style="width: 38px; height: 38px; object-fit: cover;">
                             <% } else { %>
                                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold border" 
                                      style="width: 38px; height: 38px; font-size: 0.9rem;">
-                                    <%= currentUser.name.charAt(0).toUpperCase() %>
+                                    <%= (currentUser.name || 'U').charAt(0).toUpperCase() %>
                                 </div>
                             <% } %>
                         </div>
