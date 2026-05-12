@@ -1,7 +1,0 @@
-2026-05-04 02:44:38:4438 ERROR: API postDispute Error: Dispute validation failed: status: `pending` is not a valid enum value for path `status`.
-2026-05-04 02:53:18:5318 ERROR: Role definition not found for: client
-2026-05-04 02:53:18:5318 ERROR: Role definition not found for: client
-2026-05-04 02:53:18:5318 ERROR: Role definition not found for: client
-2026-05-06 02:01:07:17 ERROR: getProjects: Cast to Number failed for value "{}" (type Object) at path "budget.min" for model "Project"
-2026-05-06 02:02:05:25 ERROR: getProjects: Cast to Number failed for value "{}" (type Object) at path "budget.min" for model "Project"
-2026-05-06 12:21:43:2143 ERROR: apiPostCreateProject Error: Project validation failed: deadline: Cast to date failed for value "Invalid Date" (type Date) at path "deadline"
