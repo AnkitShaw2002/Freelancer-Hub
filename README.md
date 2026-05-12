@@ -294,4 +294,4 @@ npm run dev
 
 ## 🙏 Acknowledgements
 
-This project was developed as a final full-stack web development project under the guidance of **[Mentor's Name] Sir**.
+This project was developed as a final full-stack web development project under the guidance of **Raju Kayal Sir**.
