@@ -217,23 +217,7 @@ C:.
 6. **Work & Communication** — Client and freelancer communicate via real-time Socket.io chat.
 7. **Project Completion** — Client marks the project complete; Stripe releases the escrowed funds to the freelancer's virtual wallet.
 
----
 
-## 🗄️ Database Schema (No-Populate Strategy)
-
-All inter-document references are stored as raw `ObjectId` fields and resolved manually in controllers — no Mongoose `.populate()` is used. This approach provides explicit control over query depth and eliminates unintended data over-fetching.
-
-**Core Collections:**
-
-| Collection | Key Fields |
-|---|---|
-| `users` | `_id`, `name`, `email`, `password`, `role` (client / freelancer) |
-| `projects` | `_id`, `clientId`, `title`, `description`, `aiSummary`, `skillTags`, `status` |
-| `bids` | `_id`, `projectId`, `freelancerId`, `amount`, `proposal`, `status` |
-| `wallets` | `_id`, `userId`, `balance`, `transactions[]` |
-| `messages` | `_id`, `projectId`, `senderId`, `receiverId`, `content`, `timestamp` |
-
----
 
 ## 🔐 Security
 
