@@ -5,6 +5,12 @@ A professional full-stack freelance marketplace where clients post AI-summarized
 
 ---
 
+
+## 🚀 Live Demo
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-brightgreen?style=for-the-badge&logo=render)](https://freelancer-hub-h8ic.onrender.com)
+
+
 ## 🚀 Features & Modules
 
 - **AI-Powered Project Posting:** Google Gemini AI auto-generates a 3-bullet summary and identifies required skill tags from the client's raw project description.
